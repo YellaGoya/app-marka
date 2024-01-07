@@ -6,7 +6,7 @@ import * as stylex from '@stylexjs/stylex';
 import styles from './keyHandle.style.js';
 
 const KeyHandle = () => {
-  const [keyValue, setKeyValue] = useState('');
+  const [keyValue, setKeyValue] = useState('click here ');
   const [keyLog, setKeyLog] = useState('');
 
   const logRef = useRef(null);
@@ -14,8 +14,6 @@ const KeyHandle = () => {
   const keyDownHandler = (e) => {
     // 키가 눌려있을 때 추가적인 입력을 막는다.
     if (e.repeat) return;
-
-    setKeyValue(e.code);
 
     // 만약 logRef 의 높이가 vh를 넘어가면 keyLog를 초기화
     if (logRef.current.scrollHeight > window.innerHeight) {
@@ -25,6 +23,12 @@ const KeyHandle = () => {
       setKeyLog(e.code + '\n' + keyLog);
     }
 
+    // modifier key 에 대한 처리
+    // if (e.ctrlKey) console.log('ctrl');
+    // if (e.shiftKey) console.log('shift');
+    // if (e.altKey) console.log('alt');
+    // if (e.metaKey) console.log('meta');
+
     console.log(e.code);
   };
 
@@ -33,7 +37,11 @@ const KeyHandle = () => {
   };
 
   const changeHandler = () => {
-    setKeyValue('');
+    setKeyValue('listening.. ');
+  };
+
+  const blurHandler = () => {
+    setKeyValue('click here ');
   };
 
   return (
@@ -49,6 +57,9 @@ const KeyHandle = () => {
         }}
         onChange={() => {
           changeHandler();
+        }}
+        onBlur={() => {
+          blurHandler();
         }}
       />
       <div {...stylex.props(styles.log)} ref={logRef}>

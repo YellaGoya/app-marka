@@ -2,11 +2,14 @@
   "name": "app-key-event-viewer",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://yellagoya.github.io/app-key-event-viewer/",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build": "next build",
+    "predeploy": "npm run build",
+    "deploy": "touch out/.nojekyll && gh-pages -d out --dotfiles"
   },
   "dependencies": {
     "@stylexjs/stylex": "^0.4.1",
@@ -29,6 +32,7 @@
     "eslint-config-xo-nextjs": "^5.3.0",
     "eslint-config-xo-react": "^0.27.0",
     "eslint-plugin-prettier": "^5.1.2",
+    "gh-pages": "^6.1.1",
     "prettier": "^3.1.1"
   }
 }
