@@ -1,13 +1,10 @@
-import * as stylex from '@stylexjs/stylex';
-import styles from './page.style.js';
-
-import KeyHandle from '@/app/_components/key/keyHandle.js';
+import Test from '@/app/components/test';
 
 const Home = () => {
   return (
-    <main {...stylex.props(styles.main)}>
+    <main>
       <div>key-event-viewer</div>
-      <KeyHandle />
+      <Test />
     </main>
   );
 };

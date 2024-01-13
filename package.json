@@ -12,20 +12,27 @@
     "deploy": "touch out/.nojekyll && gh-pages -d out --dotfiles"
   },
   "dependencies": {
-    "@stylexjs/stylex": "^0.4.1",
-    "@stylexjs/open-props": "^0.4.1",
+    "@auth/pg-adapter": "^0.2.12",
+    "@types/bcrypt": "^5.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
+    "eslint-plugin-jsonc": "^2.11.2",
     "next": "14.0.4",
+    "next-auth": "beta",
+    "pg": "^8.11.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "stylelint": "^16.1.0",
+    "stylelint-config-prettier": "^9.0.5",
+    "stylelint-prettier": "^5.0.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.2",
-    "@babel/plugin-syntax-flow": "^7.22.5",
-    "@babel/plugin-syntax-jsx": "^7.22.5",
-    "@stylexjs/babel-plugin": "^0.4.1",
-    "@stylexjs/eslint-plugin": "^0.4.1",
-    "@stylexjs/nextjs-plugin": "^0.4.1",
-    "eslint": "^8",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.47",
+    "eslint": "^8.56.0",
     "eslint-config-next": "14.0.4",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-xo": "^0.43.1",
@@ -33,6 +40,7 @@
     "eslint-config-xo-react": "^0.27.0",
     "eslint-plugin-prettier": "^5.1.2",
     "gh-pages": "^6.1.1",
-    "prettier": "^3.1.1"
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   }
 }

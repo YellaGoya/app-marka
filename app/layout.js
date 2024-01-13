@@ -1,7 +1,4 @@
-import * as stylex from '@stylexjs/stylex';
 import './globals.css';
-
-import styles from './layout.style.js';
 
 export const metadata = {
   title: 'Create Next App',
@@ -10,8 +7,8 @@ export const metadata = {
 
 const RootLayout = ({ children }) => {
   return (
-    <html {...stylex.props(styles.html)} lang="en">
-      <body {...stylex.props(styles.body)}>{children}</body>
+    <html lang="en">
+      <body>{children}</body>
     </html>
   );
 };
