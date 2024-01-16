@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { authenticate } from '@/app/lib/action/user';
+import { authenticate } from 'app/_lib/action/user';
 
 const LoginForm = () => {
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);

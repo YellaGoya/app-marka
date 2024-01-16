@@ -1,7 +1,9 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { putOnWaitingList } from '@/app/lib/action/user';
+import { putOnWaitingList } from 'app/_lib/action/user';
+
+import { test } from 'app/_lib/action/user';
 
 const LoginForm = () => {
   const initialState = { message: null, errors: {} };
@@ -44,6 +46,14 @@ const LoginForm = () => {
 
         <SubmitButton />
       </form>
+      <button
+        type="button"
+        onClick={() => {
+          test();
+        }}
+      >
+        test!!!
+      </button>
     </div>
   );
 };
