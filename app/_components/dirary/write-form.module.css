@@ -1,0 +1,67 @@
+.newWriteContainer {
+  position: relative;
+
+  max-width: 1000px;
+  width: calc(100vw - 30px);
+  min-height: 400px;
+
+  margin: 0 auto;
+  padding: 15px;
+
+  border-radius: 0.8rem;
+  background-color: #fefcff;
+
+  box-shadow:
+    rgba(17, 17, 26, 0.05) 0px 8px 16px,
+    rgba(17, 17, 26, 0.08) 0px 16px 40px;
+
+  overflow: hidden;
+}
+
+.newWriteContainer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  z-index: 0;
+  background: url("https://www.transparenttextures.com/patterns/cardboard-flat.png");
+  opacity: 0.2;
+}
+
+.form {
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  position: relative;
+  width: 100%;
+
+  color: #202020;
+  font-size: 2rem;
+  font-weight: bold;
+
+  border: none;
+  outline: none;
+  background-color: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.DivLine {
+  position: relative;
+  width: 100%;
+  height: 1px;
+
+  background-color: #e0e0e0;
+
+  margin: 9px 0;
+}
+
+.titleDiv {
+  margin: 9px;
+}

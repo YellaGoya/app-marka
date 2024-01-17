@@ -1,0 +1,25 @@
+.header {
+  height: 90px;
+  padding: 15px;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: fit-content;
+  height: 100%;
+
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+.nav > a {
+  margin: 15px;
+}
+
+.nav > a:first-child > svg {
+  width: 26px;
+  height: 26px;
+}

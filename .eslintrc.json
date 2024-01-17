@@ -29,6 +29,9 @@
     "complexity": ["error", 25],
     "no-negated-condition": "off",
     "capitalized-comments": "off",
-    "react/prop-types": "off"
+    "react/prop-types": "off",
+    "react/jsx-no-useless-fragment": "off",
+    "new-cap": ["error", { "newIsCap": false, "capIsNew": false }],
+    "react/display-name": "off"
   }
 }

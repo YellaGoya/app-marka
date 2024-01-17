@@ -20,6 +20,6 @@
     ],
     "baseUrl": "./"
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.js", "**/*.tsx", "**/*.jsx", ".next/types/**/*.ts", "next.config.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.js", "**/*.tsx", "**/*.jsx", ".next/types/**/*.ts", "next.config.js", "app/layout.jss"],
   "exclude": ["node_modules"]
 }

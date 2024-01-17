@@ -1,7 +1,5 @@
 :root {
-  --font-mono: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono",
-    "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro",
-    "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+  font-family: var(--font-lusitana), var(--font-nskr);
 }
 
 * {
@@ -17,6 +15,13 @@ a {
 
 html {
   font-size: 16px;
+  height: 100vh;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
 }
 
 /* @media (prefers-color-scheme: dark) {
