@@ -1,5 +1,7 @@
-import Header from 'app/_components/header';
 import { lusitana, notoSerifKorean } from 'app/fonts';
+
+import Header from 'app/_components/header';
+import RecoilProvider from 'app/_components/recoil-provider';
 
 import 'app/globals.css';
 import css from 'app/layout.module.css';
@@ -14,7 +16,7 @@ const RootLayout = ({ children }) => {
     <html lang="kr" className={`${lusitana.variable} ${notoSerifKorean.variable}`}>
       <body className={css.body}>
         <Header />
-        {children}
+        <RecoilProvider>{children}</RecoilProvider>
       </body>
     </html>
   );

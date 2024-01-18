@@ -19,6 +19,14 @@
   margin: 15px;
 }
 
+.nav > a > svg {
+  fill: #757575;
+}
+
+.nav > a:hover > svg {
+  fill: #000;
+}
+
 .nav > a:first-child > svg {
   width: 26px;
   height: 26px;

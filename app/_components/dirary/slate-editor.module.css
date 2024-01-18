@@ -1,4 +1,27 @@
 .slateContainer {
-  font-size: 18px;
+  min-height: 300px;
+  width: 400px;
+}
+
+.slateEditor {
+  min-height: 200px !important;
+  padding: 5spx 0;
+
   outline: none;
+
+  font-family: "Malgun Gothic";
+  font-size: 18px;
+}
+
+.slateEditor code {
+  padding: 1px 9px 3px 9px;
+
+  font-family: "Malgun Gothic";
+  background-color: #cbcbd6;
+
+  border-radius: 8px;
+}
+
+.slateEditor strong {
+  font-weight: 700;
 }

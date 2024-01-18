@@ -1,10 +1,32 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
+import { useRecoilState } from 'recoil';
+
+import { todoListState } from 'app/_lib/recoil';
 import SlateEditor from 'app/_components/dirary/slate-editor';
 
 import css from 'app/_components/dirary/write-form.module.css';
 
 const WriteForm = () => {
+  const editorRef = useRef();
+  const [todoList, setTodoList] = useRecoilState(todoListState);
+
+  // useEffect(() => {
+  //   console.log(todoList);
+  // }, [todoList]);
+
+  const handleClick = (path) => {
+    const newTodoList = new Map(todoList);
+    newTodoList.delete(path);
+    setTodoList(newTodoList);
+
+    const x = parseInt(path % 100000, 10);
+    const y = parseInt((path - x) / 100000, 10);
+
+    editorRef.current.unCodeBlock([y, x]);
+  };
+
   /** 제목 input 영역 클릭시 가장 끝으로 focus 이동 */
   const inputClickHandler = (event) => {
     event.target.focus();
@@ -36,8 +58,23 @@ const WriteForm = () => {
           }}
         />
         <div className={css.DivLine} />
-        <SlateEditor />
+        <SlateEditor ref={editorRef} />
         <div className={css.DivLine} />
+
+        <div>
+          {Array.from(todoList).map((todo) => {
+            return (
+              <div
+                key={todo[0]}
+                onClick={() => {
+                  handleClick(todo[0]);
+                }}
+              >
+                {todo[1]}
+              </div>
+            );
+          })}
+        </div>
       </form>
     </div>
   );
