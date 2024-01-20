@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useMemo, useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useRecoilState } from 'recoil';
 import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react';
-import { Editor, createEditor, Range, Transforms } from 'slate';
+import { Editor, createEditor, Range, Transforms, Text, Node, Path } from 'slate';
 import { withHistory } from 'slate-history';
 
 import { todoListState } from 'app/_lib/recoil';
@@ -14,6 +14,14 @@ const SlateEditor = forwardRef((props, ref) => {
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
   const [todoList, setTodoList] = useRecoilState(todoListState);
 
+  const [newNodeId, setNewNodeId] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  /** write-form 에서 Todolist 삭제시 code format을 제거할 수 있게 */
   useImperativeHandle(ref, () => ({
     unCodeBlock(path) {
       const range = Editor.range(editor, path);
@@ -23,38 +31,69 @@ const SlateEditor = forwardRef((props, ref) => {
   }));
 
   const keyDownHandler = (event) => {
+    /** 엔터키 입력시 모든 format을 제거하고 일반 텍스트로 */
     if (event.key === 'Enter') {
-      for (const key in Editor.marks(editor)) {
-        Editor.removeMark(editor, key);
+      const { selection } = editor;
+      const node = Editor.node(editor, selection);
+      const { text } = node[0];
+
+      event.preventDefault();
+      Editor.insertBreak(editor);
+
+      if (selection.focus.offset === 0 || (selection.focus.offset === text.length && !node[0].code)) {
+        const node = Editor.node(editor, selection);
+        const prevPath = node[1];
+        const prevLast = Node.last(editor, prevPath);
+        const lastPath = prevLast[1];
+
+        Transforms.setNodes(editor, { code: false }, { at: lastPath });
+      } else {
+        Transforms.setNodes(editor, { code: false }, { match: (n) => Text.isText(n) });
       }
+
+      return;
     }
 
+    /** 특정 format의 마지막에서 스페이스 바 2번 입력시 format 제거 */
     if (event.key === ' ') {
       const { selection } = editor;
       const [node] = Editor.node(editor, selection);
       const { text } = node;
 
-      if (selection.focus.offset === text.length && text[text.length - 1] === ' ') {
+      if (Editor.marks(editor).code && selection.focus.offset === text.length && text[text.length - 1] === ' ') {
         event.preventDefault();
 
-        for (const key in Editor.marks(editor)) {
-          Editor.removeMark(editor, key);
+        Editor.deleteBackward(editor);
+        Editor.removeMark(editor, 'code');
+      } else if (Editor.marks(editor).code !== node.code && selection.focus.offset === 0) {
+        const anchor = selection.anchor.path;
+        const [prev] = Editor.previous(editor, { at: anchor });
+        const prevText = prev.text;
+
+        if (prevText[prevText.length - 1] === ' ') {
+          Editor.deleteBackward(editor);
+          event.preventDefault();
         }
+
+        Editor.removeMark(editor, 'code');
       }
+
+      return;
     }
 
+    /** 백스페이스 핸들러 */
     if (event.key === 'Backspace') {
       const { selection } = editor;
       const anchor = selection.anchor.path;
 
+      /** 가장 첫 번째 칸에서 백스페이스 시에는 format 제거 */
       if (selection.focus.offset === 0 && anchor[0] === 0 && anchor[1] === 0) {
         event.preventDefault();
 
-        for (const key in Editor.marks(editor)) {
-          Editor.removeMark(editor, key);
-        }
+        Editor.removeMark(editor, 'code');
       }
 
+      /** 특정 code format 이 모두 지워진 경우 Todolist 에서 제거 */
       if (Editor.marks(editor).code) {
         const [node] = Editor.node(editor, selection);
         const { text } = node;
@@ -67,17 +106,31 @@ const SlateEditor = forwardRef((props, ref) => {
           setTodoList(newTodoList);
         }
       }
+
+      // return;
     }
   };
 
+  /** code 포맷으로 작성시 투두리스트에 추가, 업데이트 */
   const changeHandler = () => {
-    if (Editor.marks(editor).code) {
+    const { selection } = editor;
+    const [node] = Editor.node(editor, selection);
+
+    console.log(node);
+    if (!node.id) {
+      Transforms.setNodes(editor, { id: newNodeId }, { match: (n) => Text.isText(n) });
+      setNewNodeId(newNodeId + 1);
+    }
+
+    if (node.code) {
       const { selection } = editor;
       const [node] = Editor.node(editor, selection);
       if (node.children) return;
 
       const anchor = selection.anchor.path;
       const { text } = node;
+
+      if (text === '') return;
 
       const newTodoList = new Map(todoList);
       newTodoList.set(anchor[0] * 100000 + anchor[1], text);
@@ -102,25 +155,9 @@ const SlateEditor = forwardRef((props, ref) => {
         className={css.slateEditor}
         renderLeaf={(props) => <Leaf {...props} />}
         placeholder="내용..."
+        readOnly={!isMounted}
         onKeyDown={(event) => {
           keyDownHandler(event);
-        }}
-        onDOMBeforeInput={(event) => {
-          switch (event.inputType) {
-            case 'formatBold':
-              event.preventDefault();
-              return toggleMark(editor, 'bold');
-            case 'formatItalic':
-              event.preventDefault();
-              return toggleMark(editor, 'italic');
-            case 'formatUnderline':
-              event.preventDefault();
-              return toggleMark(editor, 'underlined');
-            case 'formatCode':
-              event.preventDefault();
-              return toggleMark(editor, 'code');
-            default:
-          }
         }}
       />
     </Slate>
@@ -130,12 +167,36 @@ const SlateEditor = forwardRef((props, ref) => {
 const toggleMark = (editor, format, todoList = null, setTodoList = null) => {
   const isActive = isMarkActive(editor, format);
 
+  const { selection } = editor;
+
+  const { anchor, focus } = selection;
+  const a = anchor.path;
+  const f = focus.path;
+
+  const path = {};
+
+  if (a[0] > f[0] || (a[0] === f[0] && a[1] > f[1])) {
+    path.start = [f[0], f[1]];
+    path.end = [a[0], a[1]];
+  } else {
+    path.start = [a[0], a[1]];
+    path.end = [f[0], f[1]];
+  }
+
+  // if (path.start[1] > 0) path.start[1] -= 1;
+  // path.end[1] += 1;
+
+  const prevNodes = [];
+
+  for (const nodeEntry of Node.nodes(editor, { from: path.start, to: path.end })) {
+    if (nodeEntry[0].text) {
+      prevNodes.push(nodeEntry);
+    }
+  }
+
   if (isActive) {
     Editor.removeMark(editor, format);
     if (format === 'code') {
-      const { selection } = editor;
-      const anchor = selection.anchor.path;
-
       const newTodoList = new Map(todoList);
       newTodoList.delete(anchor[0] * 100000 + anchor[1]);
       setTodoList(newTodoList);
@@ -151,18 +212,6 @@ const isMarkActive = (editor, format) => {
 };
 
 const Leaf = ({ attributes, children, leaf }) => {
-  if (leaf.bold) {
-    children = <strong>{children}</strong>;
-  }
-
-  if (leaf.italic) {
-    children = <em>{children}</em>;
-  }
-
-  if (leaf.underlined) {
-    children = <u>{children}</u>;
-  }
-
   if (leaf.code) {
     children = <code>{children}</code>;
   }
@@ -204,9 +253,6 @@ const HoveringToolbar = () => {
           e.preventDefault();
         }}
       >
-        <FormatButton format="bold" icon="bold" />
-        <FormatButton format="italic" icon="italic" />
-        <FormatButton format="underlined" icon="underlined" />
         <FormatButton format="code" icon="code" />
       </Menu>
     </Portal>
@@ -222,8 +268,7 @@ const FormatButton = ({ format, icon }) => {
       reversed
       active={isMarkActive(editor, format)}
       onClick={() => {
-        if (format === 'code') toggleMark(editor, format, todoList, setTodoList);
-        else toggleMark(editor, format);
+        toggleMark(editor, format, todoList, setTodoList);
       }}
     >
       <Icon>{icon}</Icon>
