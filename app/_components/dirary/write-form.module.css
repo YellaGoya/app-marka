@@ -41,7 +41,7 @@
   width: 100%;
 
   color: #202020;
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: bold;
 
   border: none;
@@ -62,11 +62,17 @@
   margin: 9px 0;
 }
 
+.bottom {
+  position: relative;
+}
+
 .todoList {
   font-family: "malgun gothic";
   font-size: 18px;
   list-style: none;
   line-height: 1.8;
+
+  min-height: 1.5rem;
 }
 
 .todoItem {
@@ -74,27 +80,51 @@
   align-items: center;
 
   width: fit-content;
-}
+  height: 1.8rem;
 
-.todoItem:hover > .todoDelete {
-  visibility: visible;
-  opacity: 1;
+  transition:
+    visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .todoItem > svg {
   margin-top: 1px;
   margin-right: 5px;
-  width: 16px;
-  height: 16px;
+  width: 1.3rem;
+  height: 1.3rem;
 
-  fill: #757575;
+  transition: fill 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.todoItemDeleted {
+  visibility: hidden;
+  opacity: 0;
+  height: 0;
+}
+
+.todoTitle {
+  display: flex;
+  align-items: center;
+
+  width: fit-content;
+}
+
+.todoTitle:hover > .todoDelete {
+  width: 17px;
+  visibility: visible;
+  opacity: 1;
 }
 
 .todoDelete {
   display: flex;
   align-items: center;
 
-  margin-left: 3px;
+  width: 0;
+
+  margin-top: 1px;
+  margin-right: 3px;
 
   border: none;
   background-color: transparent;
@@ -104,17 +134,43 @@
   opacity: 0;
 
   transition:
-    visibility 0.2s,
-    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .todoDelete > svg {
   width: 17px;
   height: 17px;
 
-  fill: #757575;
+  fill: #bbb;
 }
 
 .todoDelete:hover > svg {
   fill: #000;
+}
+
+.buttonContainer {
+  display: flex;
+  align-items: center;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  border: none;
+}
+
+.button {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.button:hover > svg {
+  fill: #000;
+}
+
+.button > svg {
+  fill: #757575;
 }

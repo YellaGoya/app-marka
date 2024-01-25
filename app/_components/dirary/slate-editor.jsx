@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo, useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { useRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react';
-import { Editor, createEditor, Range, Transforms, Text, Node, Path } from 'slate';
+import { Editor, createEditor, Range, Transforms, Text, Node } from 'slate';
 import { withHistory } from 'slate-history';
 
 import { todoListState } from 'app/_lib/recoil';
@@ -12,21 +12,38 @@ import css from 'app/_components/dirary/slate-editor.module.css';
 
 const SlateEditor = forwardRef((props, ref) => {
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-  const [todoList, setTodoList] = useRecoilState(todoListState);
 
-  const [newNodeId, setNewNodeId] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
+  const setTodoList = useSetRecoilState(todoListState);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  /** write-form 에서 Todolist 삭제시 code format을 제거할 수 있게 */
   useImperativeHandle(ref, () => ({
-    unCodeBlock(path) {
-      const range = Editor.range(editor, path);
-      Transforms.setSelection(editor, range);
-      Editor.removeMark(editor, 'code');
+    // 내부에 있는 code 블럭들을 모두 파악해서 TodoList 에 추가
+    extractTodoList() {
+      // editor의 value 또는 document를 사용하여 모든 노드에 접근
+      const nodes = Node.descendants(editor);
+      const diaryTodolist = new Map();
+      let keyNumber = 0;
+
+      for (const [node] of nodes) {
+        // 각 노드가 'code' 형식을 갖고 있고 빈칸이 아닌 경우에만 배열에 추가
+        if (node.code && node.text !== '') {
+          diaryTodolist.set(`diary-${keyNumber}`, { status: false, text: node.text.trim() });
+
+          keyNumber++;
+        }
+      }
+
+      // todoList의 'diary'를 codeTexts로 변경
+      setTodoList((prev) => {
+        return {
+          ...prev,
+          diary: diaryTodolist,
+        };
+      });
     },
   }));
 
@@ -93,50 +110,11 @@ const SlateEditor = forwardRef((props, ref) => {
         Editor.removeMark(editor, 'code');
       }
 
-      /** 특정 code format 이 모두 지워진 경우 Todolist 에서 제거 */
-      if (Editor.marks(editor).code) {
-        const [node] = Editor.node(editor, selection);
-        const { text } = node;
-
-        if (text.length === 1) {
-          const anchor = selection.anchor.path;
-
-          const newTodoList = new Map(todoList);
-          newTodoList.delete(anchor[0] * 100000 + anchor[1]);
-          setTodoList(newTodoList);
-        }
-      }
-
       // return;
     }
   };
 
-  /** code 포맷으로 작성시 투두리스트에 추가, 업데이트 */
-  const changeHandler = () => {
-    const { selection } = editor;
-    const [node] = Editor.node(editor, selection);
-
-    console.log(node);
-    if (!node.id) {
-      Transforms.setNodes(editor, { id: newNodeId }, { match: (n) => Text.isText(n) });
-      setNewNodeId(newNodeId + 1);
-    }
-
-    if (node.code) {
-      const { selection } = editor;
-      const [node] = Editor.node(editor, selection);
-      if (node.children) return;
-
-      const anchor = selection.anchor.path;
-      const { text } = node;
-
-      if (text === '') return;
-
-      const newTodoList = new Map(todoList);
-      newTodoList.set(anchor[0] * 100000 + anchor[1], text);
-      setTodoList(newTodoList);
-    }
-  };
+  const changeHandler = () => {};
 
   return (
     <Slate
@@ -164,43 +142,11 @@ const SlateEditor = forwardRef((props, ref) => {
   );
 });
 
-const toggleMark = (editor, format, todoList = null, setTodoList = null) => {
+const toggleMark = (editor, format) => {
   const isActive = isMarkActive(editor, format);
-
-  const { selection } = editor;
-
-  const { anchor, focus } = selection;
-  const a = anchor.path;
-  const f = focus.path;
-
-  const path = {};
-
-  if (a[0] > f[0] || (a[0] === f[0] && a[1] > f[1])) {
-    path.start = [f[0], f[1]];
-    path.end = [a[0], a[1]];
-  } else {
-    path.start = [a[0], a[1]];
-    path.end = [f[0], f[1]];
-  }
-
-  // if (path.start[1] > 0) path.start[1] -= 1;
-  // path.end[1] += 1;
-
-  const prevNodes = [];
-
-  for (const nodeEntry of Node.nodes(editor, { from: path.start, to: path.end })) {
-    if (nodeEntry[0].text) {
-      prevNodes.push(nodeEntry);
-    }
-  }
 
   if (isActive) {
     Editor.removeMark(editor, format);
-    if (format === 'code') {
-      const newTodoList = new Map(todoList);
-      newTodoList.delete(anchor[0] * 100000 + anchor[1]);
-      setTodoList(newTodoList);
-    }
   } else {
     Editor.addMark(editor, format, true);
   }
@@ -260,7 +206,6 @@ const HoveringToolbar = () => {
 };
 
 const FormatButton = ({ format, icon }) => {
-  const [todoList, setTodoList] = useRecoilState(todoListState);
   const editor = useSlate();
 
   return (
@@ -268,7 +213,7 @@ const FormatButton = ({ format, icon }) => {
       reversed
       active={isMarkActive(editor, format)}
       onClick={() => {
-        toggleMark(editor, format, todoList, setTodoList);
+        toggleMark(editor, format);
       }}
     >
       <Icon>{icon}</Icon>

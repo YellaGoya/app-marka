@@ -1,5 +1,4 @@
 import { lusitana, notoSerifKorean } from 'app/fonts';
-
 import Header from 'app/_components/header';
 import RecoilProvider from 'app/_components/recoil-provider';
 
