@@ -36,6 +36,12 @@
   z-index: 1;
 }
 
+.form input {
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
 .title {
   position: relative;
   width: 100%;
@@ -44,11 +50,9 @@
   font-size: 1.8rem;
   font-weight: bold;
 
-  border: none;
-  outline: none;
-  background-color: transparent;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.4;
   white-space: nowrap;
 }
 
@@ -63,7 +67,26 @@
 }
 
 .bottom {
+  min-height: 28px;
   position: relative;
+}
+
+.todoListContainer {
+  width: calc(100% - 80px);
+}
+
+.todoCategoryTitle {
+  display: flex;
+  align-items: center;
+
+  color: #757575;
+  font-weight: 700;
+}
+
+.todoCategoryTitle > svg {
+  height: 1.4rem;
+  width: 1.4rem;
+  transform: translate(3px, 1px);
 }
 
 .todoList {
@@ -79,8 +102,8 @@
   display: flex;
   align-items: center;
 
-  width: fit-content;
-  height: 1.8rem;
+  width: 100%;
+  height: 32px;
 
   transition:
     visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1),
@@ -104,17 +127,30 @@
   height: 0;
 }
 
-.todoTitle {
+.todoTitleContainer {
   display: flex;
   align-items: center;
 
-  width: fit-content;
+  width: 100%;
 }
 
-.todoTitle:hover > .todoDelete {
+.todoTitleNotEditing:hover > .todoDelete {
   width: 17px;
   visibility: visible;
   opacity: 1;
+}
+
+.todoInput {
+  width: 100%;
+  height: 32px;
+
+  color: #757575;
+}
+
+.todoTitle {
+  height: 32px;
+
+  overflow: hidden;
 }
 
 .todoDelete {
@@ -162,6 +198,8 @@
 }
 
 .button {
+  display: flex;
+  align-items: center;
   border: none;
   background-color: transparent;
   cursor: pointer;
@@ -172,5 +210,7 @@
 }
 
 .button > svg {
+  width: 26px;
+  height: 26px;
   fill: #757575;
 }
