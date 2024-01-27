@@ -45,6 +45,14 @@ const SlateEditor = forwardRef((props, ref) => {
         };
       });
     },
+
+    extractDiary() {
+      console.log('hello');
+      for (const [node] of Editor.nodes(editor)) {
+        // 이 반복문은 에디터의 모든 노드를 순회합니다.
+        console.log(node);
+      }
+    },
   }));
 
   const keyDownHandler = (event) => {

@@ -23,10 +23,20 @@ const WriteForm = () => {
 
   useEffect(() => {
     setTimeNow(new Date());
+
+    // const idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
+
+    // const indexed = window.indexedDB.open('appMarka');
+
+    // indexed.onsuccess = () => {};
   }, []);
 
-  const extractHandler = () => {
+  const extractTodoList = () => {
     editorRef.current.extractTodoList();
+  };
+
+  const saveDiary = () => {
+    editorRef.current.extractDiary();
   };
 
   /** 제목 input 영역 클릭시 가장 끝으로 focus 이동 */
@@ -49,7 +59,7 @@ const WriteForm = () => {
     }
   };
 
-  const addTodoHandler = () => {
+  const newTodoItem = () => {
     setTodoList((prev) => {
       const list = new Map(prev.manual);
 
@@ -104,7 +114,7 @@ const WriteForm = () => {
                 className={css.button}
                 style={{ marginTop: '3px', marginLeft: '3px' }}
                 onClick={() => {
-                  addTodoHandler();
+                  newTodoItem();
                 }}
               >
                 <BookmarkAddRoundedIcon />
@@ -122,16 +132,10 @@ const WriteForm = () => {
           </div>
 
           <fieldset className={css.buttonContainer}>
-            <button
-              type="button"
-              className={css.button}
-              onClick={() => {
-                extractHandler();
-              }}
-            >
+            <button type="button" className={css.button} onClick={extractTodoList}>
               <LowPriorityRoundedIcon style={{ width: '1.7rem', height: '1.7rem', marginRight: '10px' }} />
             </button>
-            <button type="button" className={css.button}>
+            <button type="button" className={css.button} onClick={saveDiary}>
               <SaveRoundedIcon />
             </button>
           </fieldset>
