@@ -36,7 +36,7 @@ const WriteForm = () => {
   };
 
   const saveDiary = () => {
-    editorRef.current.extractDiary();
+    console.log(editorRef.current.extractDiary());
   };
 
   /** 제목 input 영역 클릭시 가장 끝으로 focus 이동 */

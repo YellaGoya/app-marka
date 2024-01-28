@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react';
 import { Editor, createEditor, Range, Transforms, Text, Node } from 'slate';
 import { withHistory } from 'slate-history';
@@ -14,7 +14,7 @@ const SlateEditor = forwardRef((props, ref) => {
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const [isMounted, setIsMounted] = useState(false);
-  const setTodoList = useSetRecoilState(todoListState);
+  const [todoList, setTodoList] = useRecoilState(todoListState);
 
   useEffect(() => {
     setIsMounted(true);
@@ -47,11 +47,12 @@ const SlateEditor = forwardRef((props, ref) => {
     },
 
     extractDiary() {
-      console.log('hello');
-      for (const [node] of Editor.nodes(editor)) {
-        // 이 반복문은 에디터의 모든 노드를 순회합니다.
-        console.log(node);
-      }
+      const [total] = Editor.nodes(editor);
+      if (!total) return;
+
+      console.log(todoList);
+
+      return serializeSlateToHtml(total[0]);
     },
   }));
 
@@ -239,5 +240,20 @@ const initialValue = [
     ],
   },
 ];
+
+const serializeSlateToHtml = (node) => {
+  if (Text.isText(node)) {
+    if (node.code) return `<code>${node.text}</code>`;
+    return node.text;
+  }
+
+  const children = node.children.map((n) => serializeSlateToHtml(n)).join('');
+
+  if (node.type === 'paragraph') {
+    return `<p>${children}</p>`;
+  }
+
+  return children;
+};
 
 export default SlateEditor;
