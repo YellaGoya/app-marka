@@ -5,8 +5,10 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
 
+import { getServerTime } from 'app/_lib/action/time';
 import { todoListState } from 'app/_lib/recoil';
 import SlateEditor from 'app/_components/dirary/slate-editor';
+import indexedDb from 'app/_lib/indexed-db';
 
 import JoinFullOutlinedIcon from '@mui/icons-material/JoinFullOutlined';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
@@ -17,12 +19,24 @@ import css from 'app/_components/dirary/write-form.module.css';
 
 const WriteForm = () => {
   const editorRef = useRef();
-  const [todoList, setTodoList] = useRecoilState(todoListState);
   const [timeNow, setTimeNow] = useState(null);
+
+  const [diaryTitle, setDiaryTitle] = useState('');
+  const [todoList, setTodoList] = useRecoilState(todoListState);
   const [keyNumber, setKeyNumber] = useState(0);
 
+  const { addDiary } = indexedDb('Diaries');
+
   useEffect(() => {
-    setTimeNow(new Date());
+    getServerTime().then((result) => {
+      const serverTime = new Date(result);
+      const year = serverTime.getFullYear();
+      const month = serverTime.getMonth() + 1;
+      const day = serverTime.getDate();
+      const dateString = `${year}. ${month}. ${day}.`;
+
+      setTimeNow(dateString);
+    });
 
     // const idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
 
@@ -33,10 +47,28 @@ const WriteForm = () => {
 
   const extractTodoList = () => {
     editorRef.current.extractTodoList();
+
+    // readAll()
+    //   .then((result) => {
+    //     // result[0] 의 isoString 를 기준으로 사용자의 현재 시간대에 맞춰 변경
+    //     // const date = new Date(result[0].created_at);
+    //     // console.log(date);
+    //     console.log(result);
+    //   })
+    //   .catch((error) => new Error(error));
   };
 
   const saveDiary = () => {
-    console.log(editorRef.current.extractDiary());
+    const contentHtml = editorRef.current.extractDiary();
+
+    addDiary({
+      title: diaryTitle ? diaryTitle : timeNow,
+      content_html: contentHtml,
+      extracted_todos: Array.from(todoList.extracted.entries()),
+      manual_todos: Array.from(todoList.manual.entries()),
+      is_secret: false,
+    });
+    // updateDiary({ id: 1, title: 'test2', content: 'helloworld!2');
   };
 
   /** 제목 input 영역 클릭시 가장 끝으로 focus 이동 */
@@ -54,7 +86,7 @@ const WriteForm = () => {
       event.preventDefault();
 
       if (event.target.value === '' && timeNow) {
-        event.target.value = timeNow.toLocaleString('ko-KR');
+        event.target.value = timeNow;
       }
     }
   };
@@ -63,8 +95,8 @@ const WriteForm = () => {
     setTodoList((prev) => {
       const list = new Map(prev.manual);
 
-      list.set(`diary-${keyNumber}`, {
-        status: false,
+      list.set(`manual-${keyNumber}`, {
+        done: false,
         text: '새로운 일',
       });
 
@@ -81,10 +113,14 @@ const WriteForm = () => {
     <div className={css.newWriteContainer}>
       <form className={css.form}>
         <input
+          value={diaryTitle}
           className={css.title}
           type="text"
           maxLength="50"
-          placeholder={timeNow ? timeNow.toLocaleString('ko-KR') : null}
+          placeholder={timeNow ? timeNow : null}
+          onChange={(event) => {
+            setDiaryTitle(event.target.value);
+          }}
           onFocus={(event) => {
             inputClickHandler(event);
           }}
@@ -97,17 +133,17 @@ const WriteForm = () => {
         <div className={css.divLine} />
         <section className={css.bottom}>
           <div className={css.todoListContainer}>
-            {todoList.diary.size > 0 ? (
+            {todoList.extracted.size > 0 ? (
               <>
                 <h4 className={css.todoCategoryTitle}>다이어리</h4>
                 <ul className={css.todoList}>
-                  {Array.from(todoList.diary).map((todo) => {
-                    return <TodoList key={todo[0]} todo={todo} place="diary" />;
+                  {Array.from(todoList.extracted).map((todo) => {
+                    return <TodoList key={todo[0]} todo={todo} place="extracted" />;
                   })}
                 </ul>
               </>
             ) : null}
-            <span className={css.todoCategoryTitle} style={todoList.diary.size > 0 ? { marginTop: '16px' } : null}>
+            <span className={css.todoCategoryTitle} style={todoList.extracted.size > 0 ? { marginTop: '16px' } : null}>
               추가
               <button
                 type="button"
@@ -145,7 +181,7 @@ const WriteForm = () => {
   );
 };
 
-const TodoList = ({ todo, place = 'diary' }) => {
+const TodoList = ({ todo, place = 'extracted' }) => {
   const setTodoList = useSetRecoilState(todoListState);
   const [isDeleted, setIsDeleted] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -177,7 +213,7 @@ const TodoList = ({ todo, place = 'diary' }) => {
       const list = new Map(prev[place]);
 
       list.set(todo[0], {
-        status: list.get(todo[0]).status,
+        done: list.get(todo[0]).done,
         text,
       });
 
@@ -191,7 +227,7 @@ const TodoList = ({ todo, place = 'diary' }) => {
   return (
     <li className={clsx(css.todoItem, { [css.todoItemDeleted]: isDeleted })}>
       <JoinFullOutlinedIcon
-        style={{ fill: todo[1].status ? '#ffbe00' : '#ccc' }}
+        style={{ fill: todo[1].done ? '#ffbe00' : '#ccc' }}
         onClick={() => {
           statusChangeHandler(setTodoList, todo[0], place);
         }}
@@ -243,7 +279,7 @@ const statusChangeHandler = (setList, key, place) => {
     const list = new Map(prev[place]);
 
     list.set(key, {
-      status: !list.get(key).status,
+      done: !list.get(key).done,
       text: list.get(key).text,
     });
 

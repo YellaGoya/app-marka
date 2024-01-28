@@ -2,5 +2,5 @@ import { atom } from 'recoil';
 
 export const todoListState = atom({
   key: 'todoListState',
-  default: { diary: [], manual: [] },
+  default: { extracted: [], manual: [] },
 });

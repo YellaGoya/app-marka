@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { useRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react';
 import { Editor, createEditor, Range, Transforms, Text, Node } from 'slate';
 import { withHistory } from 'slate-history';
@@ -14,7 +14,7 @@ const SlateEditor = forwardRef((props, ref) => {
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const [isMounted, setIsMounted] = useState(false);
-  const [todoList, setTodoList] = useRecoilState(todoListState);
+  const setTodoList = useSetRecoilState(todoListState);
 
   useEffect(() => {
     setIsMounted(true);
@@ -31,7 +31,7 @@ const SlateEditor = forwardRef((props, ref) => {
       for (const [node] of nodes) {
         // 각 노드가 'code' 형식을 갖고 있고 빈칸이 아닌 경우에만 배열에 추가
         if (node.code && node.text !== '') {
-          diaryTodolist.set(`diary-${keyNumber}`, { status: false, text: node.text.trim() });
+          diaryTodolist.set(`extracted-${keyNumber}`, { done: false, text: node.text.trim() });
 
           keyNumber++;
         }
@@ -41,7 +41,7 @@ const SlateEditor = forwardRef((props, ref) => {
       setTodoList((prev) => {
         return {
           ...prev,
-          diary: diaryTodolist,
+          extracted: diaryTodolist,
         };
       });
     },
@@ -49,8 +49,6 @@ const SlateEditor = forwardRef((props, ref) => {
     extractDiary() {
       const [total] = Editor.nodes(editor);
       if (!total) return;
-
-      console.log(todoList);
 
       return serializeSlateToHtml(total[0]);
     },

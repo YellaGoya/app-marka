@@ -34,6 +34,9 @@
     "new-cap": ["error", { "newIsCap": false, "capIsNew": false }],
     "react/display-name": "off",
     "guard-for-in": "off",
-    "react/hook-use-state": "off"
+    "react/hook-use-state": "off",
+    "react-hooks/rules-of-hooks": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "camelcase": "off"
   }
 }
