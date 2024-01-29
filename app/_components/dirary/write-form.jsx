@@ -25,7 +25,7 @@ const WriteForm = () => {
   const [todoList, setTodoList] = useRecoilState(todoListState);
   const [keyNumber, setKeyNumber] = useState(0);
 
-  const { addDiary } = indexedDb('Diaries');
+  const { addDiary, readAll } = indexedDb('Diaries');
 
   useEffect(() => {
     getServerTime().then((result) => {
@@ -48,14 +48,14 @@ const WriteForm = () => {
   const extractTodoList = () => {
     editorRef.current.extractTodoList();
 
-    // readAll()
-    //   .then((result) => {
-    //     // result[0] 의 isoString 를 기준으로 사용자의 현재 시간대에 맞춰 변경
-    //     // const date = new Date(result[0].created_at);
-    //     // console.log(date);
-    //     console.log(result);
-    //   })
-    //   .catch((error) => new Error(error));
+    readAll()
+      .then((result) => {
+        // result[0] 의 isoString 를 기준으로 사용자의 현재 시간대에 맞춰 변경
+        // const date = new Date(result[0].created_at);
+        // console.log(date);
+        console.log(result);
+      })
+      .catch((error) => new Error(error));
   };
 
   const saveDiary = () => {

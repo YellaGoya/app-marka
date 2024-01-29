@@ -1,117 +1,98 @@
-import { useEffect, useState, useCallback } from 'react';
 import { openDB, IDBPDatabase } from 'idb';
-
 import { getServerTime } from 'app/_lib/action/time';
-
 import { Diary } from 'app/_lib/type-def';
 
-interface DiaryEntry {
-  id?: number;
-  // 여기에 다른 diary 엔트리 속성을 추가하세요.
-  // 예: content: string;
+// 싱글턴 인스턴스를 저장할 변수를 정의합니다.
+let dbInstance: IDBPDatabase | null = null;
+
+async function initDB(storeName: string): Promise<IDBPDatabase> {
+  if (dbInstance) return dbInstance;
+
+  dbInstance = await openDB('AppMarka', 8, {
+    upgrade(db) {
+      if (db.objectStoreNames.contains(storeName)) {
+        // storeName Object Store가 이미 존재한다면 삭제 후 다시 생성합니다.
+        db.deleteObjectStore(storeName);
+      }
+
+      db.createObjectStore(storeName, { keyPath: 'diary_id' });
+    },
+  });
+
+  return dbInstance;
 }
 
 const indexedDb = (storeName: string) => {
-  const [db, setDb] = useState<IDBPDatabase | null>(null);
-
-  useEffect(() => {
-    async function initDB() {
-      const db = await openDB('AppMarka', 8, {
-        upgrade(db) {
-          db.deleteObjectStore(storeName);
-
-          if (!db.objectStoreNames.contains(storeName)) {
-            db.createObjectStore(storeName, { keyPath: 'diary_id' });
-          }
-        },
-      });
-
-      setDb(db);
-    }
-
-    initDB();
-
-    return () => {
-      db?.close();
-    };
-  }, [storeName]);
+  // 인스턴스 제공자 함수로 수정합니다.
+  const getDb = async () => {
+    if (!dbInstance) dbInstance = await initDB(storeName);
+    return dbInstance;
+  };
 
   // useCallback을 사용하여 함수 재생성 방지
-  const addDiary = useCallback(
-    async (diary: Diary): Promise<void> => {
-      if (!db) return;
+  const addDiary = async (diary: Diary): Promise<void> => {
+    const db = await getDb();
 
-      let time;
-      let timestamp;
-      try {
-        time = await getServerTime();
-        timestamp = new Date(time).getTime();
-      } catch (error) {
-        console.error('Failed to fetch server time:', error);
+    let time;
+    let timestamp;
+    try {
+      time = await getServerTime();
+      timestamp = new Date(time).getTime();
+    } catch (error) {
+      console.error('Failed to fetch server time:', error);
 
-        const date = new Date();
+      const date = new Date();
 
-        time = date.toISOString();
-        timestamp = date.getTime();
-      }
+      time = date.toISOString();
+      timestamp = date.getTime();
+    }
 
-      diary.diary_id = timestamp;
-      diary.created_at = time;
-      diary.updated_at = time;
-      const tx = db.transaction(storeName, 'readwrite');
-      const store = tx.objectStore(storeName);
-      await store.add(diary);
-      await tx.done;
-    },
-    [db, storeName],
-  );
+    diary.diary_id = timestamp;
+    diary.created_at = time;
+    diary.updated_at = time;
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    await store.add(diary);
+    await tx.done;
+  };
 
-  const updateDiary = useCallback(
-    async (diary: DiaryEntry): Promise<void> => {
-      if (!db) return;
+  const updateDiary = async (diary: Diary): Promise<void> => {
+    const db = await getDb();
 
-      const tx = db.transaction(storeName, 'readwrite');
-      const store = tx.objectStore(storeName);
-      await store.put(diary);
-      await tx.done;
-    },
-    [db, storeName],
-  );
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    await store.put(diary);
+    await tx.done;
+  };
 
-  const removeDiary = useCallback(
-    async (id: number): Promise<void> => {
-      if (!db) return;
+  const removeDiary = async (id: number): Promise<void> => {
+    const db = await getDb();
 
-      const tx = db.transaction(storeName, 'readwrite');
-      const store = tx.objectStore(storeName);
-      await store.delete(id);
-      await tx.done;
-    },
-    [db, storeName],
-  );
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    await store.delete(id);
+    await tx.done;
+  };
 
-  const readDiary = useCallback(
-    async (id: number): Promise<DiaryEntry | undefined> => {
-      if (!db) return;
-
-      const tx = db.transaction(storeName, 'readonly');
-      const store = tx.objectStore(storeName);
-      const diary: DiaryEntry = await store.get(id);
-      await tx.done;
-      return diary;
-    },
-    [db, storeName],
-  );
-
-  const readAll = useCallback(async (): Promise<DiaryEntry[] | undefined> => {
-    if (!db) return;
+  const readDiary = async (id: number): Promise<Diary | undefined> => {
+    const db = await getDb();
 
     const tx = db.transaction(storeName, 'readonly');
     const store = tx.objectStore(storeName);
-    const list: DiaryEntry[] = await store.getAll();
+    const diary: Diary = await store.get(id);
+    await tx.done;
+    return diary;
+  };
+
+  const readAll = async (): Promise<Diary[] | undefined> => {
+    const db = await getDb();
+
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    const list: Diary[] = await store.getAll();
     await tx.done;
     return list;
-  }, [db, storeName]);
+  };
 
   return { addDiary, updateDiary, removeDiary, readDiary, readAll };
 };
