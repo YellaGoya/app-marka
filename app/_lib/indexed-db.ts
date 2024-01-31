@@ -111,7 +111,17 @@ const indexedDb = (storeName: string) => {
 
     const tx = db.transaction(storeName, 'readonly');
     const store = tx.objectStore(storeName);
-    const list: Diary[] = await store.getAll();
+
+    const index = store.index('created_at_index');
+    let cursor = await index.openCursor(null, 'prev');
+
+    const list: Diary[] = [];
+
+    while (cursor) {
+      list.push(cursor.value); // 각 항목을 배열에 추가합니다.
+      cursor = await cursor.continue(); // 커서를 다음 항목으로 이동시킵니다.
+    }
+
     await tx.done;
     return list;
   };

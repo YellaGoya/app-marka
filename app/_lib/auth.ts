@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable new-cap */
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import PostgresAdapter from '@auth/pg-adapter';

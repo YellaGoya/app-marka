@@ -5,7 +5,7 @@ import { putOnWaitingList } from 'app/_lib/action/user';
 
 import { test } from 'app/_lib/action/user';
 
-const LoginForm = () => {
+const RegistForm = () => {
   const initialState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(putOnWaitingList, initialState);
 
@@ -68,4 +68,4 @@ const SubmitButton = () => {
   );
 };
 
-export default LoginForm;
+export default RegistForm;

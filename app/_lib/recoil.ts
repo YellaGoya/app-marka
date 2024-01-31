@@ -9,3 +9,8 @@ export const slateIsEmptyState = atom({
   key: 'slateIsEmptyState',
   default: true,
 });
+
+export const diariesState = atom({
+  key: 'diariesState',
+  default: [],
+});

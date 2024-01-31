@@ -1,4 +1,3 @@
-// eslint-disable-next-line camelcase
 import { Lusitana, Noto_Serif_KR } from 'next/font/google';
 
 export const lusitana = Lusitana({

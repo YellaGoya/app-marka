@@ -1,11 +1,11 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil';
 import clsx from 'clsx';
 
 import { getServerTime } from 'app/_lib/action/time';
-import { todoListState, slateIsEmptyState } from 'app/_lib/recoil';
+import { todoListState, slateIsEmptyState, diariesState } from 'app/_lib/recoil';
 import indexedDb from 'app/_lib/indexed-db';
 
 import SlateEditor from 'app/_components/dirary/slate-editor';
@@ -22,9 +22,11 @@ const WriteForm = () => {
 
   const [diaryTitle, setDiaryTitle] = useState('');
   const [todoList, setTodoList] = useRecoilState(todoListState);
+
   const slateIsEmpty = useRecoilValue(slateIsEmptyState);
 
-  const { addDiary } = indexedDb('Diaries');
+  const { addDiary, readAll } = indexedDb('Diaries');
+  const setDiaries = useSetRecoilState(diariesState);
 
   useEffect(() => {
     getServerTime().then((result) => {
@@ -51,8 +53,22 @@ const WriteForm = () => {
       extracted_todos: Array.from(todoList.extracted.entries()),
       manual_todos: Array.from(todoList.manual.entries()),
       is_secret: false,
+    }).then(() => {
+      // window.location.reload();
+      getMyDiaries();
     });
+
     // updateDiary({ id: 1, title: 'test2', content: 'helloworld!2');
+  };
+
+  const getMyDiaries = async () => {
+    let diaries = [];
+    try {
+      diaries = await readAll();
+      setDiaries(diaries);
+    } catch {
+      return new Error('Error: getMyDiaries.');
+    }
   };
 
   /** 제목 input 영역 클릭시 가장 끝으로 focus 이동 */

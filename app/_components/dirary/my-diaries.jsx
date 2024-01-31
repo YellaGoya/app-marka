@@ -1,17 +1,19 @@
 'use client';
 
 import indexedDb from 'app/_lib/indexed-db';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useRecoilState } from 'recoil';
 import clsx from 'clsx';
 
 import TodoList from 'app/_components/dirary/todo-list';
+import { diariesState } from 'app/_lib/recoil';
 
 import css from 'app/_components/dirary/my-diaries.module.css';
 import global from 'app/globals.module.css';
 
 const MyDiaries = () => {
   const { readAll } = indexedDb('Diaries');
-  const [diaries, setDiaries] = useState([]);
+  const [diaries, setDiaries] = useRecoilState(diariesState);
 
   useEffect(() => {
     getMyDiaries();
