@@ -5,8 +5,9 @@ import { useSetRecoilState } from 'recoil';
 import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react';
 import { Editor, createEditor, Range, Transforms, Text, Node } from 'slate';
 import { withHistory } from 'slate-history';
+import { useDebouncedCallback } from 'use-debounce';
 
-import { todoListState } from 'app/_lib/recoil';
+import { todoListState, slateIsEmptyState } from 'app/_lib/recoil';
 import { Button, Icon, Menu, Portal } from 'app/_components/dirary/slate-components';
 import css from 'app/_components/dirary/slate-editor.module.css';
 
@@ -15,6 +16,7 @@ const SlateEditor = forwardRef((props, ref) => {
 
   const [isMounted, setIsMounted] = useState(false);
   const setTodoList = useSetRecoilState(todoListState);
+  const setSlateIsEmpty = useSetRecoilState(slateIsEmptyState);
 
   useEffect(() => {
     setIsMounted(true);
@@ -121,7 +123,18 @@ const SlateEditor = forwardRef((props, ref) => {
     }
   };
 
-  const changeHandler = () => {};
+  const checkEmpty = useDebouncedCallback(() => {
+    const [total] = Editor.nodes(editor);
+    const nodes = total[0].children;
+    const firstNode = nodes[0].children;
+
+    if (nodes.length === 1 && firstNode.length === 1 && !firstNode[0].text) {
+      setSlateIsEmpty(true);
+      return;
+    }
+
+    setSlateIsEmpty(false);
+  }, 300);
 
   return (
     <Slate
@@ -132,7 +145,7 @@ const SlateEditor = forwardRef((props, ref) => {
         minHeight: '300px',
       }}
       onChange={() => {
-        changeHandler();
+        checkEmpty();
       }}
     >
       <HoveringToolbar />

@@ -1,0 +1,40 @@
+.divLine {
+  position: relative;
+  max-width: 970px;
+  width: calc(100vw -30px);
+  height: 1px;
+
+  background-color: #e0e0e0;
+
+  margin: 9px auto;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+
+  border: none;
+  background-color: transparent;
+
+  cursor: pointer;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button:hover > svg {
+  fill: #000;
+}
+
+.button > svg {
+  width: 26px;
+  height: 26px;
+  fill: #757575;
+}
+
+.disabledButton {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.selectedButton > svg {
+  fill: #000;
+}

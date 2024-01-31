@@ -5,7 +5,7 @@
 
 .slateEditor {
   min-height: 200px !important;
-  padding: 5spx 0;
+  padding: 3px 0;
 
   outline: none;
 
@@ -21,8 +21,4 @@
   background-color: #cbcbd6;
 
   border-radius: 8px;
-}
-
-.slateEditor strong {
-  font-weight: 700;
 }

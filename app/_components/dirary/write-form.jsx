@@ -1,21 +1,20 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
-import { useDebouncedCallback } from 'use-debounce';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import clsx from 'clsx';
 
 import { getServerTime } from 'app/_lib/action/time';
-import { todoListState } from 'app/_lib/recoil';
-import SlateEditor from 'app/_components/dirary/slate-editor';
+import { todoListState, slateIsEmptyState } from 'app/_lib/recoil';
 import indexedDb from 'app/_lib/indexed-db';
 
-import JoinFullOutlinedIcon from '@mui/icons-material/JoinFullOutlined';
-import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import SlateEditor from 'app/_components/dirary/slate-editor';
+import TodoList from 'app/_components/dirary/todo-list';
+
 import LowPriorityRoundedIcon from '@mui/icons-material/LowPriorityRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
-import BookmarkAddRoundedIcon from '@mui/icons-material/BookmarkAddRounded';
 import css from 'app/_components/dirary/write-form.module.css';
+import global from 'app/globals.module.css';
 
 const WriteForm = () => {
   const editorRef = useRef();
@@ -23,9 +22,9 @@ const WriteForm = () => {
 
   const [diaryTitle, setDiaryTitle] = useState('');
   const [todoList, setTodoList] = useRecoilState(todoListState);
-  const [keyNumber, setKeyNumber] = useState(0);
+  const slateIsEmpty = useRecoilValue(slateIsEmptyState);
 
-  const { addDiary, readAll } = indexedDb('Diaries');
+  const { addDiary } = indexedDb('Diaries');
 
   useEffect(() => {
     getServerTime().then((result) => {
@@ -37,25 +36,10 @@ const WriteForm = () => {
 
       setTimeNow(dateString);
     });
-
-    // const idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
-
-    // const indexed = window.indexedDB.open('appMarka');
-
-    // indexed.onsuccess = () => {};
   }, []);
 
   const extractTodoList = () => {
     editorRef.current.extractTodoList();
-
-    readAll()
-      .then((result) => {
-        // result[0] 의 isoString 를 기준으로 사용자의 현재 시간대에 맞춰 변경
-        // const date = new Date(result[0].created_at);
-        // console.log(date);
-        console.log(result);
-      })
-      .catch((error) => new Error(error));
   };
 
   const saveDiary = () => {
@@ -91,24 +75,6 @@ const WriteForm = () => {
     }
   };
 
-  const newTodoItem = () => {
-    setTodoList((prev) => {
-      const list = new Map(prev.manual);
-
-      list.set(`manual-${keyNumber}`, {
-        done: false,
-        text: '새로운 일',
-      });
-
-      return {
-        ...prev,
-        manual: list,
-      };
-    });
-
-    setKeyNumber((prev) => prev + 1);
-  };
-
   return (
     <div className={css.newWriteContainer}>
       <form className={css.form}>
@@ -128,50 +94,21 @@ const WriteForm = () => {
             enterKeyHandler(event);
           }}
         />
-        <div className={css.divLine} />
-        <SlateEditor ref={editorRef} />
-        <div className={css.divLine} />
-        <section className={css.bottom}>
-          <div className={css.todoListContainer}>
-            {todoList.extracted.size > 0 ? (
-              <>
-                <h4 className={css.todoCategoryTitle}>다이어리</h4>
-                <ul className={css.todoList}>
-                  {Array.from(todoList.extracted).map((todo) => {
-                    return <TodoList key={todo[0]} todo={todo} place="extracted" />;
-                  })}
-                </ul>
-              </>
-            ) : null}
-            <span className={css.todoCategoryTitle} style={todoList.extracted.size > 0 ? { marginTop: '16px' } : null}>
-              추가
-              <button
-                type="button"
-                className={css.button}
-                style={{ marginTop: '3px', marginLeft: '3px' }}
-                onClick={() => {
-                  newTodoItem();
-                }}
-              >
-                <BookmarkAddRoundedIcon />
-              </button>
-            </span>
-            {todoList.manual.size > 0 ? (
-              <>
-                <ul className={css.todoList}>
-                  {Array.from(todoList.manual).map((todo) => {
-                    return <TodoList key={todo[0]} todo={todo} place="manual" />;
-                  })}
-                </ul>
-              </>
-            ) : null}
-          </div>
 
+        <div className={global.divLine} />
+
+        <SlateEditor ref={editorRef} />
+
+        <div className={global.divLine} />
+
+        <TodoList todoList={todoList} setTodoList={setTodoList} />
+
+        <section className={css.bottom}>
           <fieldset className={css.buttonContainer}>
-            <button type="button" className={css.button} onClick={extractTodoList}>
+            <button type="button" className={clsx(global.button, { [global.disabledButton]: slateIsEmpty })} onClick={extractTodoList}>
               <LowPriorityRoundedIcon style={{ width: '1.7rem', height: '1.7rem', marginRight: '10px' }} />
             </button>
-            <button type="button" className={css.button} onClick={saveDiary}>
+            <button type="button" className={clsx(global.button, css.save, { [global.disabledButton]: slateIsEmpty })} onClick={saveDiary}>
               <SaveRoundedIcon />
             </button>
           </fieldset>
@@ -179,132 +116,6 @@ const WriteForm = () => {
       </form>
     </div>
   );
-};
-
-const TodoList = ({ todo, place = 'extracted' }) => {
-  const setTodoList = useSetRecoilState(todoListState);
-  const [isDeleted, setIsDeleted] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [todoTitle, setTodoTitle] = useState(todo[1].text);
-
-  const titleRef = useRef(null);
-
-  useEffect(() => {
-    if (isEditing) {
-      titleRef.current.focus();
-    }
-  }, [isEditing]);
-
-  const titleChangeHandler = (event) => {
-    setTodoTitle(event.target.value);
-    updateTodoText(event.target.value);
-  };
-
-  const keyDownHandler = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-
-      setIsEditing(false);
-    }
-  };
-
-  const updateTodoText = useDebouncedCallback((text) => {
-    setTodoList((prev) => {
-      const list = new Map(prev[place]);
-
-      list.set(todo[0], {
-        done: list.get(todo[0]).done,
-        text,
-      });
-
-      return {
-        ...prev,
-        [place]: list,
-      };
-    });
-  }, 300);
-
-  return (
-    <li className={clsx(css.todoItem, { [css.todoItemDeleted]: isDeleted })}>
-      <JoinFullOutlinedIcon
-        style={{ fill: todo[1].done ? '#ffbe00' : '#ccc' }}
-        onClick={() => {
-          statusChangeHandler(setTodoList, todo[0], place);
-        }}
-      />
-      <div className={clsx(css.todoTitleContainer, { [css.todoTitleNotEditing]: !isEditing })}>
-        <button
-          className={css.todoDelete}
-          type="button"
-          onClick={() => {
-            setIsDeleted(true);
-            deleteHandler(setTodoList, todo[0], place);
-          }}
-        >
-          <DeleteRoundedIcon />
-        </button>
-        {isEditing ? (
-          <input
-            ref={titleRef}
-            value={todoTitle}
-            className={css.todoInput}
-            onChange={(event) => {
-              titleChangeHandler(event);
-            }}
-            onKeyDown={(event) => {
-              keyDownHandler(event);
-            }}
-            onBlur={() => {
-              setIsEditing(false);
-            }}
-          />
-        ) : (
-          <span
-            className={css.todoTitle}
-            onClick={() => {
-              setIsEditing(true);
-            }}
-          >
-            {todo[1].text}
-          </span>
-        )}
-      </div>
-    </li>
-  );
-};
-
-/** 투두리스트 done, undone 상태 처리 */
-const statusChangeHandler = (setList, key, place) => {
-  setList((prev) => {
-    const list = new Map(prev[place]);
-
-    list.set(key, {
-      done: !list.get(key).done,
-      text: list.get(key).text,
-    });
-
-    return {
-      ...prev,
-      [place]: list,
-    };
-  });
-};
-
-/** 투두리스트 삭제 전 transition 적용 및 제거 */
-const deleteHandler = (setList, key, place) => {
-  // transition 이 끝난 0.5초 뒤에 삭제
-  setTimeout(() => {
-    setList((prev) => {
-      const list = new Map(prev[place]);
-
-      list.delete(key);
-
-      return {
-        ...prev,
-        [place]: list,
-      };
-    });
-  }, 500);
 };
 
 export default WriteForm;

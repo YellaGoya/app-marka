@@ -8,14 +8,15 @@ let dbInstance: IDBPDatabase | null = null;
 async function initDB(storeName: string): Promise<IDBPDatabase> {
   if (dbInstance) return dbInstance;
 
-  dbInstance = await openDB('AppMarka', 8, {
+  dbInstance = await openDB('AppMarka', 9, {
     upgrade(db) {
       if (db.objectStoreNames.contains(storeName)) {
         // storeName Object Store가 이미 존재한다면 삭제 후 다시 생성합니다.
         db.deleteObjectStore(storeName);
       }
 
-      db.createObjectStore(storeName, { keyPath: 'diary_id' });
+      const store = db.createObjectStore(storeName, { keyPath: 'diary_id' });
+      store.createIndex('created_at_index', 'created_at', { unique: false });
     },
   });
 

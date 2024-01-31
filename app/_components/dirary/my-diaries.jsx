@@ -2,6 +2,12 @@
 
 import indexedDb from 'app/_lib/indexed-db';
 import { useState, useEffect } from 'react';
+import clsx from 'clsx';
+
+import TodoList from 'app/_components/dirary/todo-list';
+
+import css from 'app/_components/dirary/my-diaries.module.css';
+import global from 'app/globals.module.css';
 
 const MyDiaries = () => {
   const { readAll } = indexedDb('Diaries');
@@ -15,7 +21,6 @@ const MyDiaries = () => {
     let diaries = [];
     try {
       diaries = await readAll();
-      console.log(diaries[0]);
       setDiaries(diaries);
     } catch {
       return new Error('Error: getMyDiaries.');
@@ -23,16 +28,22 @@ const MyDiaries = () => {
   };
 
   return (
-    <section>
+    <>
       {diaries.map((diary) => {
         return (
-          <article key={diary.diary_id}>
-            <h4>{diary.title}</h4>
-            <div dangerouslySetInnerHTML={{ __html: diary.content_html }} />
-          </article>
+          <div key={diary.diary_id}>
+            <article className={css.diariesContainer}>
+              <h3>{diary.title}</h3>
+              <div dangerouslySetInnerHTML={{ __html: diary.content_html }} className={css.diaryCotentContainer} />
+              <div>
+                <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} />
+              </div>
+            </article>
+            {diaries.indexOf(diary) === diaries.length - 1 ? null : <div className={clsx(global.divLine)} />}
+          </div>
         );
       })}
-    </section>
+    </>
   );
 };
 

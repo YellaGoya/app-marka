@@ -30,7 +30,6 @@
   fill: #000;
 }
 
-.nav > a:first-child > svg {
-  width: 26px;
-  height: 26px;
+.selectedLink > svg {
+  fill: #000 !important;
 }
