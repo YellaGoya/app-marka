@@ -66,6 +66,27 @@ const indexedDb = (storeName: string) => {
     await tx.done;
   };
 
+  type TodoType = 'extracted_todos' | 'manual_todos';
+
+  const updateStatus = async (place: 'extracted' | 'manual', diaryId: string, todoId: string, status: boolean): Promise<void> => {
+    let todoType: TodoType;
+    if (place === 'extracted') todoType = 'extracted_todos';
+    else todoType = 'manual_todos';
+
+    const db = await getDb();
+
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    const diary: Diary = await store.get(diaryId);
+
+    const idx = diary[todoType].findIndex(([todo_id]) => todo_id === todoId);
+    console.log(place);
+    diary[todoType][idx][1].done = status;
+
+    await store.put(diary);
+    await tx.done;
+  };
+
   const removeDiary = async (id: number): Promise<void> => {
     const db = await getDb();
 
@@ -95,7 +116,7 @@ const indexedDb = (storeName: string) => {
     return list;
   };
 
-  return { addDiary, updateDiary, removeDiary, readDiary, readAll };
+  return { addDiary, updateDiary, updateStatus, removeDiary, readDiary, readAll };
 };
 
 export default indexedDb;

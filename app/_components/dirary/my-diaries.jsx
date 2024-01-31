@@ -36,7 +36,7 @@ const MyDiaries = () => {
               <h3>{diary.title}</h3>
               <div dangerouslySetInnerHTML={{ __html: diary.content_html }} className={css.diaryCotentContainer} />
               <div>
-                <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} />
+                <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} diaryId={diary.diary_id} />
               </div>
             </article>
             {diaries.indexOf(diary) === diaries.length - 1 ? null : <div className={clsx(global.divLine)} />}

@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSetRecoilState } from 'recoil';
 import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
 
-import { todoListState } from 'app/_lib/recoil';
+import indexedDb from 'app/_lib/indexed-db';
 
 import JoinFullOutlinedIcon from '@mui/icons-material/JoinFullOutlined';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
@@ -14,16 +13,23 @@ import BookmarkAddRoundedIcon from '@mui/icons-material/BookmarkAddRounded';
 import css from 'app/_components/dirary/todo-list.module.css';
 import global from 'app/globals.module.css';
 
-const TodoList = ({ todoList, setTodoList }) => {
-  const extractedArray = Array.from(todoList.extracted);
-  const manualArray = Array.from(todoList.manual);
+const TodoList = ({ todoList, setTodoList, diaryId }) => {
+  const isWrite = Boolean(setTodoList);
+  if (!isWrite) {
+    const list = {
+      extracted: new Map(todoList.extracted),
+      manual: new Map(todoList.manual),
+    };
+    [todoList, setTodoList] = useState(list);
+  }
+
+  const { extracted } = todoList;
+  const { manual } = todoList;
 
   const [keyNumber, setKeyNumber] = useState(0);
 
-  if (!setTodoList) console.log(manualArray);
-
   let newTodoItem;
-  if (setTodoList)
+  if (isWrite)
     newTodoItem = () => {
       setTodoList((prev) => {
         const list = new Map(prev.manual);
@@ -43,22 +49,22 @@ const TodoList = ({ todoList, setTodoList }) => {
     };
 
   return (
-    <div className={css.todoListContainer}>
-      {extractedArray && extractedArray.length > 0 && (
+    <div className={css.todoListContainer} style={isWrite ? null : { marginTop: '40px' }}>
+      {extracted && extracted.size > 0 && (
         <>
           <h4 className={css.todoCategoryTitle}>다이어리</h4>
           <ul className={css.todoList}>
-            {Array.from(extractedArray).map((todo) => {
-              return <TodoItem key={todo[0]} todo={todo} place="extracted" />;
+            {Array.from(extracted).map((todo) => {
+              return <TodoItem key={todo[0]} todo={todo} place="extracted" setTodoList={setTodoList} diaryId={diaryId} />;
             })}
           </ul>
         </>
       )}
 
-      {((manualArray && manualArray.length > 0) || setTodoList) && (
-        <span className={css.todoCategoryTitle} style={extractedArray && extractedArray.length > 0 ? { marginTop: '16px' } : null}>
+      {((manual && manual.size > 0) || isWrite) && (
+        <span className={css.todoCategoryTitle} style={extracted && extracted.size > 0 ? { marginTop: '16px' } : null}>
           추가
-          {setTodoList && (
+          {isWrite && (
             <button
               type="button"
               className={global.button}
@@ -72,11 +78,11 @@ const TodoList = ({ todoList, setTodoList }) => {
           )}
         </span>
       )}
-      {manualArray && manualArray.length > 0 && (
+      {manual && manual.size > 0 && (
         <>
           <ul className={css.todoList}>
-            {Array.from(manualArray).map((todo) => {
-              return <TodoItem key={todo[0]} todo={todo} place="manual" />;
+            {Array.from(manual).map((todo) => {
+              return <TodoItem key={todo[0]} todo={todo} place="manual" setTodoList={setTodoList} isWrite={isWrite} diaryId={diaryId} />;
             })}
           </ul>
         </>
@@ -85,14 +91,18 @@ const TodoList = ({ todoList, setTodoList }) => {
   );
 };
 
-const TodoItem = ({ todo, place = 'extracted' }) => {
+const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) => {
   if (!todo) return;
-  const setTodoList = useSetRecoilState(todoListState);
   const [isDeleted, setIsDeleted] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [todoTitle, setTodoTitle] = useState(todo[1].text);
 
   const titleRef = useRef(null);
+
+  let updateStatus;
+  if (!isWrite) {
+    ({ updateStatus } = indexedDb('Diaries'));
+  }
 
   useEffect(() => {
     if (isEditing) {
@@ -102,7 +112,17 @@ const TodoItem = ({ todo, place = 'extracted' }) => {
 
   const titleChangeHandler = (event) => {
     setTodoTitle(event.target.value);
+    console.log('hey');
     updateTodoText(event.target.value);
+  };
+
+  const titleOnBlurHandler = () => {
+    if (!todoTitle) {
+      setTodoTitle('---');
+      updateTodoText('---');
+    }
+
+    setIsEditing(false);
   };
 
   const keyDownHandler = (event) => {
@@ -129,31 +149,42 @@ const TodoItem = ({ todo, place = 'extracted' }) => {
     });
   }, 300);
 
-  /** 투두리스트 done, undone 상태 처리 */
-  const statusChangeHandler = (key, place) => {
-    setTodoList((prev) => {
-      const list = new Map(prev[place]);
+  /** 투두리스트 done, undone 상태 토글 처리 */
+  const updateTodoStatus = async (todoId, done) => {
+    console.log(place);
+    let apiResult = true;
 
-      list.set(key, {
-        done: !list.get(key).done,
-        text: list.get(key).text,
+    if (!isWrite)
+      await updateStatus(place, diaryId, todoId, done).catch(() => {
+        apiResult = false;
       });
 
-      return {
-        ...prev,
-        [place]: list,
-      };
-    });
+    // API 결과에 따라 상태 업데이트
+    if (apiResult) {
+      setTodoList((prev) => {
+        const list = new Map(prev[place]);
+
+        list.set(todoId, {
+          done,
+          text: list.get(todoId).text,
+        });
+
+        return {
+          ...prev,
+          [place]: list,
+        };
+      });
+    }
   };
 
   /** 투두리스트 삭제 전 transition 적용 및 제거 */
-  const deleteHandler = (key, place) => {
+  const deleteHandler = (todoId) => {
     // transition 이 끝난 0.5초 뒤에 삭제
     setTimeout(() => {
       setTodoList((prev) => {
         const list = new Map(prev[place]);
 
-        list.delete(key);
+        list.delete(todoId);
 
         return {
           ...prev,
@@ -168,21 +199,24 @@ const TodoItem = ({ todo, place = 'extracted' }) => {
       <JoinFullOutlinedIcon
         style={{ fill: todo[1].done ? '#ffbe00' : '#ccc' }}
         onClick={() => {
-          statusChangeHandler(todo[0], place);
+          updateTodoStatus(todo[0], !todo[1].done);
         }}
       />
       <div className={clsx(css.todoTitleContainer, { [css.todoTitleNotEditing]: !isEditing })}>
-        <button
-          className={css.todoDelete}
-          type="button"
-          onClick={() => {
-            setIsDeleted(true);
-            deleteHandler(todo[0], place);
-          }}
-        >
-          <DeleteRoundedIcon />
-        </button>
-        {isEditing ? (
+        {isWrite && (
+          <button
+            className={css.todoDelete}
+            type="button"
+            onClick={() => {
+              setIsDeleted(true);
+              deleteHandler(todo[0]);
+            }}
+          >
+            <DeleteRoundedIcon />
+          </button>
+        )}
+
+        {isWrite && isEditing ? (
           <input
             ref={titleRef}
             value={todoTitle}
@@ -194,14 +228,14 @@ const TodoItem = ({ todo, place = 'extracted' }) => {
               keyDownHandler(event);
             }}
             onBlur={() => {
-              setIsEditing(false);
+              titleOnBlurHandler();
             }}
           />
         ) : (
           <span
             className={css.todoTitle}
             onClick={() => {
-              setIsEditing(true);
+              if (isWrite) setIsEditing(true);
             }}
           >
             {todo[1].text}

@@ -96,14 +96,11 @@ const WriteForm = () => {
         />
 
         <div className={global.divLine} />
-
         <SlateEditor ref={editorRef} />
-
         <div className={global.divLine} />
 
-        <TodoList todoList={todoList} setTodoList={setTodoList} />
-
         <section className={css.bottom}>
+          <TodoList todoList={todoList} setTodoList={setTodoList} />
           <fieldset className={css.buttonContainer}>
             <button type="button" className={clsx(global.button, { [global.disabledButton]: slateIsEmpty })} onClick={extractTodoList}>
               <LowPriorityRoundedIcon style={{ width: '1.7rem', height: '1.7rem', marginRight: '10px' }} />
