@@ -1,4 +1,4 @@
-import { lusitana, notoSerifKorean } from 'app/fonts';
+import { jua } from 'app/fonts';
 import Header from 'app/_components/header';
 import RecoilProvider from 'app/_components/recoil-provider';
 
@@ -12,7 +12,8 @@ export const metadata = {
 
 const RootLayout = ({ children }) => {
   return (
-    <html lang="kr" className={`${notoSerifKorean.variable} ${lusitana.variable}`}>
+    <html lang="kr" className={jua.className}>
+      {/* <html lang="kr" className={`${hyRGothic.variable} ${lusitana.variable}`}> */}
       <body className={css.body}>
         <Header />
         <RecoilProvider>{children}</RecoilProvider>

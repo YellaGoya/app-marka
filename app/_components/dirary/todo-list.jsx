@@ -8,7 +8,7 @@ import indexedDb from 'app/_lib/indexed-db';
 
 import JoinFullOutlinedIcon from '@mui/icons-material/JoinFullOutlined';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
-import BookmarkAddRoundedIcon from '@mui/icons-material/BookmarkAddRounded';
+import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 
 import css from 'app/_components/dirary/todo-list.module.css';
 import global from 'app/globals.module.css';
@@ -49,7 +49,10 @@ const TodoList = ({ todoList, setTodoList, diaryId }) => {
     };
 
   return (
-    <div className={css.todoListContainer} style={isWrite ? null : { marginTop: '40px' }}>
+    <div
+      className={css.todoListContainer}
+      style={isWrite ? { paddingTop: '4px' } : extracted && extracted.size === 0 && manual && manual.size === 0 ? null : { marginTop: '40px' }}
+    >
       {extracted && extracted.size > 0 && (
         <>
           <h4 className={css.todoCategoryTitle}>다이어리</h4>
@@ -63,17 +66,16 @@ const TodoList = ({ todoList, setTodoList, diaryId }) => {
 
       {((manual && manual.size > 0) || isWrite) && (
         <span className={css.todoCategoryTitle} style={extracted && extracted.size > 0 ? { marginTop: '16px' } : null}>
-          추가
+          <span>추가</span>
           {isWrite && (
             <button
               type="button"
               className={global.button}
-              style={{ marginTop: '3px', marginLeft: '3px' }}
               onClick={() => {
                 newTodoItem();
               }}
             >
-              <BookmarkAddRoundedIcon />
+              <AddBoxRoundedIcon />
             </button>
           )}
         </span>

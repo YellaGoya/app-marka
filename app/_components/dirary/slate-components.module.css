@@ -1,4 +1,7 @@
 .button {
+  display: flex;
+  align-items: center;
+
   cursor: pointer;
   transition: color 0.2s ease;
 }
@@ -25,24 +28,21 @@
 }
 
 .menu {
-  padding: 8px 7px 6px;
+  display: flex;
+  align-items: center;
+  margin-top: -8px;
+  padding: 2px 8px 5px 8px;
+
   position: absolute;
   top: -10000px;
   left: -10000px;
-  margin-top: -6px;
+
   opacity: 0;
-  background-color: #222;
-  border-radius: 4px;
-  transition: opacity 0.2s;
+  background-color: #222222dd;
+  border-radius: 12px;
   z-index: 10;
-}
 
-.menu > * {
-  display: inline-block;
-}
-
-.menu > * + * {
-  margin-left: 15px;
+  transition: opacity 0.2s;
 }
 
 .portal {

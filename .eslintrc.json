@@ -38,6 +38,7 @@
     "react-hooks/rules-of-hooks": "off",
     "react-hooks/exhaustive-deps": "off",
     "camelcase": "off",
-    "react/no-danger": "off"
+    "react/no-danger": "off",
+    "no-await-in-loop": "off"
   }
 }

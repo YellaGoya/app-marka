@@ -10,10 +10,14 @@
   font-weight: 700;
 }
 
-.todoCategoryTitle > svg {
-  height: 1.4rem;
+.todoCategoryTitle > button {
+  margin-top: -1px;
+  margin-left: 3px;
+}
+
+.todoCategoryTitle > button > svg {
   width: 1.4rem;
-  transform: translate(3px, 1px);
+  height: 1.4rem;
 }
 
 .todoList {

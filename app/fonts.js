@@ -1,13 +1,6 @@
-import { Lusitana, Noto_Serif_KR } from 'next/font/google';
+import { Gothic_A1 } from 'next/font/google';
 
-export const lusitana = Lusitana({
-  subsets: ['latin'],
-  variable: '--font-lusitana',
+export const jua = Gothic_A1({
   weight: '400',
-});
-
-export const notoSerifKorean = Noto_Serif_KR({
-  preload: false,
-  variable: '--font-nskr',
-  weight: '300',
+  subsets: ['latin'],
 });

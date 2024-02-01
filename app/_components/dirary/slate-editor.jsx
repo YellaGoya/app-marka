@@ -8,7 +8,9 @@ import { withHistory } from 'slate-history';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { todoListState, slateIsEmptyState } from 'app/_lib/recoil';
-import { Button, Icon, Menu, Portal } from 'app/_components/dirary/slate-components';
+import { Button, Menu, Portal } from 'app/_components/dirary/slate-components';
+
+import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
 import css from 'app/_components/dirary/slate-editor.module.css';
 
 const SlateEditor = forwardRef((props, ref) => {
@@ -53,6 +55,15 @@ const SlateEditor = forwardRef((props, ref) => {
       if (!total) return;
 
       return serializeSlateToHtml(total[0]);
+    },
+
+    emptyDiary() {
+      Transforms.delete(editor, {
+        at: {
+          anchor: Editor.start(editor, []),
+          focus: Editor.end(editor, []),
+        },
+      });
     },
   }));
 
@@ -219,13 +230,13 @@ const HoveringToolbar = () => {
           e.preventDefault();
         }}
       >
-        <FormatButton format="code" icon="code" />
+        <FormatButton format="code" />
       </Menu>
     </Portal>
   );
 };
 
-const FormatButton = ({ format, icon }) => {
+const FormatButton = ({ format }) => {
   const editor = useSlate();
 
   return (
@@ -236,7 +247,7 @@ const FormatButton = ({ format, icon }) => {
         toggleMark(editor, format);
       }}
     >
-      <Icon>{icon}</Icon>
+      <DriveFileRenameOutlineRoundedIcon />
     </Button>
   );
 };

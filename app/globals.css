@@ -1,7 +1,3 @@
-:root {
-  font-family: var(--font-lusitana), var(--font-nskr);
-}
-
 * {
   box-sizing: border-box;
   padding: 0;

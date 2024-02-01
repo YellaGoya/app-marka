@@ -25,7 +25,7 @@ const WriteForm = () => {
 
   const slateIsEmpty = useRecoilValue(slateIsEmptyState);
 
-  const { addDiary, readAll } = indexedDb('Diaries');
+  const { addDiary, readDiaries } = indexedDb('Diaries');
   const setDiaries = useSetRecoilState(diariesState);
 
   useEffect(() => {
@@ -54,17 +54,18 @@ const WriteForm = () => {
       manual_todos: Array.from(todoList.manual.entries()),
       is_secret: false,
     }).then(() => {
-      // window.location.reload();
-      getMyDiaries();
+      editorRef.current.emptyDiary();
+      setTodoList({ extracted: [], manual: [] });
+
+      updateMyDiaries();
     });
 
     // updateDiary({ id: 1, title: 'test2', content: 'helloworld!2');
   };
 
-  const getMyDiaries = async () => {
-    let diaries = [];
+  const updateMyDiaries = async () => {
     try {
-      diaries = await readAll();
+      const diaries = await readDiaries(false);
       setDiaries(diaries);
     } catch {
       return new Error('Error: getMyDiaries.');

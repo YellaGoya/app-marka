@@ -4,6 +4,7 @@ import { Diary } from 'app/_lib/type-def';
 
 // 싱글턴 인스턴스를 저장할 변수를 정의합니다.
 let dbInstance: IDBPDatabase | null = null;
+let cursorKey: IDBValidKey | undefined;
 
 async function initDB(storeName: string): Promise<IDBPDatabase> {
   if (dbInstance) return dbInstance;
@@ -80,7 +81,6 @@ const indexedDb = (storeName: string) => {
     const diary: Diary = await store.get(diaryId);
 
     const idx = diary[todoType].findIndex(([todo_id]) => todo_id === todoId);
-    console.log(place);
     diary[todoType][idx][1].done = status;
 
     await store.put(diary);
@@ -106,27 +106,39 @@ const indexedDb = (storeName: string) => {
     return diary;
   };
 
-  const readAll = async (): Promise<Diary[] | undefined> => {
+  const readDiaries = async (isLazyLoading: boolean): Promise<Diary[]> => {
     const db = await getDb();
 
     const tx = db.transaction(storeName, 'readonly');
     const store = tx.objectStore(storeName);
 
     const index = store.index('created_at_index');
-    let cursor = await index.openCursor(null, 'prev');
+
+    let cursor;
+    if (isLazyLoading) {
+      const keyRange = IDBKeyRange.upperBound(cursorKey);
+      cursor = await index.openCursor(keyRange, 'prev');
+    } else {
+      cursor = await index.openCursor(null, 'prev');
+    }
 
     const list: Diary[] = [];
 
-    while (cursor) {
-      list.push(cursor.value); // 각 항목을 배열에 추가합니다.
-      cursor = await cursor.continue(); // 커서를 다음 항목으로 이동시킵니다.
+    let count = 0;
+    while (cursor && count < 10) {
+      list.push(cursor.value);
+
+      cursor = await cursor.continue();
+      cursorKey = cursor?.key;
+
+      count++;
     }
 
     await tx.done;
     return list;
   };
 
-  return { addDiary, updateDiary, updateStatus, removeDiary, readDiary, readAll };
+  return { addDiary, updateDiary, updateStatus, removeDiary, readDiary, readDiaries };
 };
 
 export default indexedDb;
