@@ -6,6 +6,7 @@ import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react';
 import { Editor, createEditor, Range, Transforms, Text, Node } from 'slate';
 import { withHistory } from 'slate-history';
 import { useDebouncedCallback } from 'use-debounce';
+import clsx from 'clsx';
 
 import { todoListState, slateIsEmptyState } from 'app/_lib/recoil';
 import { Button, Menu, Portal } from 'app/_components/dirary/slate-components';
@@ -20,9 +21,57 @@ const SlateEditor = forwardRef((props, ref) => {
   const setTodoList = useSetRecoilState(todoListState);
   const setSlateIsEmpty = useSetRecoilState(slateIsEmptyState);
 
+  const isSelected = useRef(false);
+
   useEffect(() => {
     setIsMounted(true);
+
+    document.addEventListener('selectionchange', selectionChangeHandler);
+
+    return () => {
+      document.removeEventListener('selectionchange', selectionChangeHandler);
+    };
   }, []);
+
+  const dblClickHandler = () => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+
+    if (selectedText[selectedText.length - 1] === ' ' && selectedText !== ' ') {
+      const trimmedText = selectedText.trim();
+      const range = selection.getRangeAt(0).cloneRange();
+      range.setEnd(range.endContainer, range.endOffset - (selectedText.length - trimmedText.length));
+
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    if (selectedText && !isSelected.current) {
+      const parentElement = document.getElementById('slateEditor');
+      const styleElement = document.createElement('style');
+      styleElement.id = 'selectedEditor';
+      document.head.appendChild(styleElement);
+
+      const newRule = `
+      #${parentElement.id} *::selection {
+        background-color: #cbcbd6;;
+      }
+      `;
+      styleElement.sheet.insertRule(newRule, 0);
+
+      isSelected.current = true;
+    }
+  };
+
+  const selectionChangeHandler = () => {
+    const selection = window.getSelection();
+    if (!selection.toString().trim() && isSelected.current) {
+      const styleElement = document.getElementById('selectedEditor');
+      document.head.removeChild(styleElement);
+
+      isSelected.current = false;
+    }
+  };
 
   useImperativeHandle(ref, () => ({
     // 내부에 있는 code 블럭들을 모두 파악해서 TodoList 에 추가
@@ -136,6 +185,8 @@ const SlateEditor = forwardRef((props, ref) => {
 
   const checkEmpty = useDebouncedCallback(() => {
     const [total] = Editor.nodes(editor);
+    if (!total) return;
+
     const nodes = total[0].children;
     const firstNode = nodes[0].children;
 
@@ -161,10 +212,14 @@ const SlateEditor = forwardRef((props, ref) => {
     >
       <HoveringToolbar />
       <Editable
-        className={css.slateEditor}
+        id="slateEditor"
+        className={clsx(css.slateEditor, { [css.selected]: isSelected.current })}
         renderLeaf={(props) => <Leaf {...props} />}
         placeholder="내용..."
         readOnly={!isMounted}
+        onDoubleClick={() => {
+          dblClickHandler();
+        }}
         onKeyDown={(event) => {
           keyDownHandler(event);
         }}
@@ -173,7 +228,7 @@ const SlateEditor = forwardRef((props, ref) => {
   );
 });
 
-const toggleMark = (editor, format) => {
+const toggleMark = async (editor, format) => {
   const isActive = isMarkActive(editor, format);
 
   if (isActive) {
@@ -181,6 +236,8 @@ const toggleMark = (editor, format) => {
   } else {
     Editor.addMark(editor, format, true);
   }
+
+  Transforms.deselect(editor);
 };
 
 const isMarkActive = (editor, format) => {
@@ -217,9 +274,11 @@ const HoveringToolbar = () => {
     const domSelection = window.getSelection();
     const domRange = domSelection.getRangeAt(0);
     const rect = domRange.getBoundingClientRect();
-    el.style.opacity = '1';
-    el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
-    el.style.left = `${rect.left + window.pageXOffset - el.offsetWidth / 2 + rect.width / 2}px`;
+    if (el) {
+      el.style.opacity = '1';
+      el.style.top = `${rect.bottom + window.pageYOffset - el.offsetHeight + 13}px`;
+      el.style.left = `${rect.left + window.pageXOffset - el.offsetWidth}px`;
+    }
   });
 
   return (

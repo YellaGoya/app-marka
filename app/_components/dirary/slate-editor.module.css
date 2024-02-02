@@ -14,6 +14,10 @@
   line-height: 1.8;
 }
 
+.slateEditor *::selection {
+  background-color: transparent;
+}
+
 .slateEditor code {
   padding: 1px 9px 3px 9px;
 

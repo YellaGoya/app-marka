@@ -1,6 +1,2 @@
 .main {
 }
-
-.main > *:last-child {
-  padding-bottom: 150px;
-}

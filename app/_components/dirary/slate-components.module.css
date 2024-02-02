@@ -15,7 +15,7 @@
 }
 
 .aaa {
-  color: #aaa;
+  color: #666;
 }
 
 .ccc {
@@ -38,7 +38,10 @@
   left: -10000px;
 
   opacity: 0;
-  background-color: #222222dd;
+  background-color: #22222222;
+  /* 배경을 중심으로 부터 밖으로 blur */
+  backdrop-filter: blur(6px);
+
   border-radius: 12px;
   z-index: 10;
 

@@ -50,7 +50,11 @@ const MyDiaries = () => {
       {diaries &&
         diaries.map((diary) => {
           return (
-            <div ref={diaries.indexOf(diary) === diaries.length - 1 ? lastDiaryRef : undefined} key={diary.diary_id}>
+            <div
+              ref={diaries.indexOf(diary) === diaries.length - 1 ? lastDiaryRef : undefined}
+              key={diary.diary_id}
+              style={diaries.indexOf(diary) === diaries.length - 1 ? { paddingBottom: '150px' } : null}
+            >
               <article className={css.diariesContainer}>
                 <h3>{diary.title}</h3>
                 <div dangerouslySetInnerHTML={{ __html: diary.content_html }} className={css.diaryCotentContainer} />
