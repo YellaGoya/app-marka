@@ -54,6 +54,7 @@ const WriteForm = () => {
       manual_todos: Array.from(todoList.manual.entries()),
       is_secret: false,
     }).then(() => {
+      setDiaryTitle('');
       editorRef.current.emptyDiary();
       setTodoList({ extracted: [], manual: [] });
 

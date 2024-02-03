@@ -12,6 +12,7 @@ import { todoListState, slateIsEmptyState } from 'app/_lib/recoil';
 import { Button, Menu, Portal } from 'app/_components/dirary/slate-components';
 
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
+import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import css from 'app/_components/dirary/slate-editor.module.css';
 
 const SlateEditor = forwardRef((props, ref) => {
@@ -26,10 +27,10 @@ const SlateEditor = forwardRef((props, ref) => {
   useEffect(() => {
     setIsMounted(true);
 
-    document.addEventListener('selectionchange', selectionChangeHandler);
+    document.addEventListener('selectionchange', browserSelectionChangeHandler);
 
     return () => {
-      document.removeEventListener('selectionchange', selectionChangeHandler);
+      document.removeEventListener('selectionchange', browserSelectionChangeHandler);
     };
   }, []);
 
@@ -45,8 +46,20 @@ const SlateEditor = forwardRef((props, ref) => {
       selection.removeAllRanges();
       selection.addRange(range);
     }
+  };
 
-    if (selectedText && !isSelected.current) {
+  const browserSelectionChangeHandler = () => {
+    if (document.activeElement.id !== 'slateEditor') return;
+
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+
+    if (isSelected.current && !selectedText) {
+      const styleElement = document.getElementById('selectedEditor');
+      document.head.removeChild(styleElement);
+
+      isSelected.current = false;
+    } else if (!isSelected.current && selectedText && (selectedText[selectedText.length - 1] !== ' ' || selectedText === ' ')) {
       const parentElement = document.getElementById('slateEditor');
       const styleElement = document.createElement('style');
       styleElement.id = 'selectedEditor';
@@ -54,22 +67,12 @@ const SlateEditor = forwardRef((props, ref) => {
 
       const newRule = `
       #${parentElement.id} *::selection {
-        background-color: #cbcbd6;;
+        background-color: #d0e1fc;;
       }
       `;
       styleElement.sheet.insertRule(newRule, 0);
 
       isSelected.current = true;
-    }
-  };
-
-  const selectionChangeHandler = () => {
-    const selection = window.getSelection();
-    if (!selection.toString().trim() && isSelected.current) {
-      const styleElement = document.getElementById('selectedEditor');
-      document.head.removeChild(styleElement);
-
-      isSelected.current = false;
     }
   };
 
@@ -276,8 +279,8 @@ const HoveringToolbar = () => {
     const rect = domRange.getBoundingClientRect();
     if (el) {
       el.style.opacity = '1';
-      el.style.top = `${rect.bottom + window.pageYOffset - el.offsetHeight + 13}px`;
-      el.style.left = `${rect.left + window.pageXOffset - el.offsetWidth}px`;
+      el.style.top = `${rect.bottom + window.pageYOffset - el.offsetHeight + 12}px`;
+      el.style.left = `${rect.left + window.pageXOffset - 35}px`;
     }
   });
 
@@ -306,7 +309,59 @@ const FormatButton = ({ format }) => {
         toggleMark(editor, format);
       }}
     >
-      <DriveFileRenameOutlineRoundedIcon />
+      {isMarkActive(editor, format) ? (
+        <>
+          <ClearRoundedIcon
+            sx={{
+              filter: 'blur(8px)',
+              position: 'absolute',
+              color: 'rgba(0, 0, 0, 0.15)',
+              zIndex: '1',
+            }}
+          />
+          <ClearRoundedIcon
+            sx={{
+              filter: 'blur(3px)',
+              position: 'absolute',
+              color: 'rgba(0, 0, 0, 0.35)',
+              zIndex: '2',
+            }}
+          />
+          {/* 선명한 아이콘 */}
+          <ClearRoundedIcon
+            sx={{
+              position: 'relative',
+              zIndex: '3',
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <DriveFileRenameOutlineRoundedIcon
+            sx={{
+              filter: 'blur(8px)',
+              position: 'absolute',
+              color: 'rgba(0, 0, 0, 0.15)',
+              zIndex: '1',
+            }}
+          />
+          <DriveFileRenameOutlineRoundedIcon
+            sx={{
+              filter: 'blur(3px)',
+              position: 'absolute',
+              color: 'rgba(0, 0, 0, 0.35)',
+              zIndex: '2',
+            }}
+          />
+          {/* 선명한 아이콘 */}
+          <DriveFileRenameOutlineRoundedIcon
+            sx={{
+              position: 'relative',
+              zIndex: '3',
+            }}
+          />
+        </>
+      )}
     </Button>
   );
 };

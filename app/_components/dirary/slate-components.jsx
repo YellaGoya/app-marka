@@ -8,7 +8,7 @@ import css from 'app/_components/dirary/slate-components.module.css';
 import clsx from 'clsx';
 
 export const Button = forwardRef(({ className, active, reversed, ...props }, ref) => (
-  <span {...props} ref={ref} className={clsx(className, css.button, reversed ? (active ? css.white : css.aaa) : active ? css.black : css.ccc)} />
+  <span {...props} ref={ref} className={clsx(className, css.button, reversed ? css.aaa : active ? css.black : css.ccc)} />
 ));
 
 export const Icon = forwardRef(({ className, ...props }, ref) => <span {...props} ref={ref} className={clsx(className, css.icon)} />);

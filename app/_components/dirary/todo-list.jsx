@@ -58,7 +58,7 @@ const TodoList = ({ todoList, setTodoList, diaryId }) => {
           <h4 className={css.todoCategoryTitle}>다이어리</h4>
           <ul className={css.todoList}>
             {Array.from(extracted).map((todo) => {
-              return <TodoItem key={todo[0]} todo={todo} place="extracted" setTodoList={setTodoList} diaryId={diaryId} />;
+              return <TodoItem key={todo[0]} todo={todo} place="extracted" setTodoList={setTodoList} isWrite={isWrite} diaryId={diaryId} />;
             })}
           </ul>
         </>
@@ -114,7 +114,6 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
 
   const titleChangeHandler = (event) => {
     setTodoTitle(event.target.value);
-    console.log('hey');
     updateTodoText(event.target.value);
   };
 
@@ -153,7 +152,6 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
 
   /** 투두리스트 done, undone 상태 토글 처리 */
   const updateTodoStatus = async (todoId, done) => {
-    console.log(place);
     let apiResult = true;
 
     if (!isWrite)
@@ -161,7 +159,6 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
         apiResult = false;
       });
 
-    // API 결과에 따라 상태 업데이트
     if (apiResult) {
       setTodoList((prev) => {
         const list = new Map(prev[place]);
