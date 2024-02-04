@@ -31,8 +31,8 @@ const TodoList = ({ todoList, setTodoList, diaryId }) => {
   let newTodoItem;
   if (isWrite)
     newTodoItem = () => {
-      setTodoList((prev) => {
-        const list = new Map(prev.manual);
+      setTodoList((prevTodoList) => {
+        const list = new Map(prevTodoList.manual);
 
         list.set(`manual-${keyNumber}`, {
           done: false,
@@ -40,12 +40,12 @@ const TodoList = ({ todoList, setTodoList, diaryId }) => {
         });
 
         return {
-          ...prev,
+          ...prevTodoList,
           manual: list,
         };
       });
 
-      setKeyNumber((prev) => prev + 1);
+      setKeyNumber((prevKey) => prevKey + 1);
     };
 
   return (
@@ -135,8 +135,8 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
   };
 
   const updateTodoText = useDebouncedCallback((text) => {
-    setTodoList((prev) => {
-      const list = new Map(prev[place]);
+    setTodoList((prevTodoList) => {
+      const list = new Map(prevTodoList[place]);
 
       list.set(todo[0], {
         done: list.get(todo[0]).done,
@@ -144,7 +144,7 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
       });
 
       return {
-        ...prev,
+        ...prevTodoList,
         [place]: list,
       };
     });
@@ -160,8 +160,8 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
       });
 
     if (apiResult) {
-      setTodoList((prev) => {
-        const list = new Map(prev[place]);
+      setTodoList((prevTodoList) => {
+        const list = new Map(prevTodoList[place]);
 
         list.set(todoId, {
           done,
@@ -169,7 +169,7 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
         });
 
         return {
-          ...prev,
+          ...prevTodoList,
           [place]: list,
         };
       });
@@ -180,13 +180,13 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
   const deleteHandler = (todoId) => {
     // transition 이 끝난 0.5초 뒤에 삭제
     setTimeout(() => {
-      setTodoList((prev) => {
-        const list = new Map(prev[place]);
+      setTodoList((prevTodoList) => {
+        const list = new Map(prevTodoList[place]);
 
         list.delete(todoId);
 
         return {
-          ...prev,
+          ...prevTodoList,
           [place]: list,
         };
       });

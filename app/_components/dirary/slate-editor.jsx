@@ -67,7 +67,7 @@ const SlateEditor = forwardRef((props, ref) => {
 
       const newRule = `
       #${parentElement.id} *::selection {
-        background-color: #d0e1fc;;
+        background-color: #d7e5fc;
       }
       `;
       styleElement.sheet.insertRule(newRule, 0);
@@ -94,9 +94,9 @@ const SlateEditor = forwardRef((props, ref) => {
       }
 
       // todoList의 'diary'를 codeTexts로 변경
-      setTodoList((prev) => {
+      setTodoList((prevTodoList) => {
         return {
-          ...prev,
+          ...prevTodoList,
           extracted: diaryTodolist,
         };
       });
@@ -275,12 +275,15 @@ const HoveringToolbar = () => {
     }
 
     const domSelection = window.getSelection();
-    const domRange = domSelection.getRangeAt(0);
-    const rect = domRange.getBoundingClientRect();
-    if (el) {
-      el.style.opacity = '1';
-      el.style.top = `${rect.bottom + window.pageYOffset - el.offsetHeight + 12}px`;
-      el.style.left = `${rect.left + window.pageXOffset - 35}px`;
+    console.log(domSelection);
+    if (domSelection) {
+      const domRange = domSelection.getRangeAt(0);
+      const rect = domRange.getBoundingClientRect();
+      if (el) {
+        el.style.opacity = '1';
+        el.style.top = `${rect.bottom + window.pageYOffset - el.offsetHeight + 10}px`;
+        el.style.left = `${rect.left + window.pageXOffset - 29}px`;
+      }
     }
   });
 
@@ -311,22 +314,6 @@ const FormatButton = ({ format }) => {
     >
       {isMarkActive(editor, format) ? (
         <>
-          <ClearRoundedIcon
-            sx={{
-              filter: 'blur(8px)',
-              position: 'absolute',
-              color: 'rgba(0, 0, 0, 0.15)',
-              zIndex: '1',
-            }}
-          />
-          <ClearRoundedIcon
-            sx={{
-              filter: 'blur(3px)',
-              position: 'absolute',
-              color: 'rgba(0, 0, 0, 0.35)',
-              zIndex: '2',
-            }}
-          />
           {/* 선명한 아이콘 */}
           <ClearRoundedIcon
             sx={{
@@ -337,22 +324,6 @@ const FormatButton = ({ format }) => {
         </>
       ) : (
         <>
-          <DriveFileRenameOutlineRoundedIcon
-            sx={{
-              filter: 'blur(8px)',
-              position: 'absolute',
-              color: 'rgba(0, 0, 0, 0.15)',
-              zIndex: '1',
-            }}
-          />
-          <DriveFileRenameOutlineRoundedIcon
-            sx={{
-              filter: 'blur(3px)',
-              position: 'absolute',
-              color: 'rgba(0, 0, 0, 0.35)',
-              zIndex: '2',
-            }}
-          />
           {/* 선명한 아이콘 */}
           <DriveFileRenameOutlineRoundedIcon
             sx={{

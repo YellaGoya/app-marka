@@ -87,12 +87,12 @@ const indexedDb = (storeName: string) => {
     await tx.done;
   };
 
-  const removeDiary = async (id: number): Promise<void> => {
+  const removeDiary = async (diary_id: number): Promise<void> => {
     const db = await getDb();
 
     const tx = db.transaction(storeName, 'readwrite');
     const store = tx.objectStore(storeName);
-    await store.delete(id);
+    await store.delete(diary_id);
     await tx.done;
   };
 

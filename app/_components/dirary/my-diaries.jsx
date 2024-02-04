@@ -3,16 +3,18 @@
 import indexedDb from 'app/_lib/indexed-db';
 import { useEffect, useRef, useCallback } from 'react';
 import { useRecoilState } from 'recoil';
-import clsx from 'clsx';
 
 import TodoList from 'app/_components/dirary/todo-list';
 import { diariesState } from 'app/_lib/recoil';
+
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 import css from 'app/_components/dirary/my-diaries.module.css';
 import global from 'app/globals.module.css';
 
 const MyDiaries = () => {
-  const { readDiaries } = indexedDb('Diaries');
+  const { readDiaries, removeDiary } = indexedDb('Diaries');
   const [diaries, setDiaries] = useRecoilState(diariesState);
 
   useEffect(() => {
@@ -36,8 +38,8 @@ const MyDiaries = () => {
       const newDiaries = await readDiaries(isLazyLoading);
 
       if (isLazyLoading)
-        setDiaries((prevDiareis) => {
-          return [...prevDiareis, ...newDiaries];
+        setDiaries((prevDiaries) => {
+          return [...prevDiaries, ...newDiaries];
         });
       else setDiaries(newDiaries);
     } catch {
@@ -45,10 +47,21 @@ const MyDiaries = () => {
     }
   });
 
+  const removeDiaryHandler = (diaryId, idx) => {
+    removeDiary(diaryId).then(() => {
+      setDiaries((prevDiaries) => {
+        const removedDiaries = [...prevDiaries];
+        removedDiaries.splice(idx, 1);
+
+        return removedDiaries;
+      });
+    });
+  };
+
   return (
     <>
       {diaries &&
-        diaries.map((diary) => {
+        diaries.map((diary, idx) => {
           return (
             <div
               ref={diaries.indexOf(diary) === diaries.length - 1 ? lastDiaryRef : undefined}
@@ -56,13 +69,30 @@ const MyDiaries = () => {
               style={diaries.indexOf(diary) === diaries.length - 1 ? { paddingBottom: '150px' } : null}
             >
               <article className={css.diariesContainer}>
-                <h3>{diary.title}</h3>
+                <span className={css.diariesTitle}>
+                  {diary.title}
+                  <div className={css.diariesButtonContainer}>
+                    <button type="button" className={global.button}>
+                      <EditRoundedIcon />
+                    </button>
+                    <button
+                      type="button"
+                      className={global.button}
+                      onClick={() => {
+                        removeDiaryHandler(diary.diary_id, idx);
+                      }}
+                    >
+                      <DeleteRoundedIcon />
+                    </button>
+                  </div>
+                  <div style={{ width: '1px', height: '1px' }} />
+                </span>
                 <div dangerouslySetInnerHTML={{ __html: diary.content_html }} className={css.diaryCotentContainer} />
                 <div>
                   <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} diaryId={diary.diary_id} />
                 </div>
               </article>
-              {diaries.indexOf(diary) === diaries.length - 1 ? null : <div className={clsx(global.divLine)} />}
+              {diaries.indexOf(diary) === diaries.length - 1 ? null : <div className={global.divLine} style={{ width: 'calc(100% - 60px)' }} />}
             </div>
           );
         })}
