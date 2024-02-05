@@ -11,7 +11,7 @@
 
   font-family: "Malgun Gothic";
   font-size: 18px;
-  line-height: 1.56;
+  line-height: 1.73;
 }
 
 .slateEditor *::selection {
@@ -19,14 +19,18 @@
 }
 
 .slateEditor code {
-  padding: 2px 9px 2px 9px;
+  padding: 1px 9px 2px 9px;
 
   font-family: "Malgun Gothic";
-  background-color: #cbcbd6;
+  background-color: #ddd;
 
   border-radius: 8px;
 }
 
 .slateEditor > div {
-  margin-bottom: 4px;
+  margin-bottom: 10px;
+}
+
+.editEditor code {
+  background-color: #555;
 }

@@ -4,8 +4,9 @@ import indexedDb from 'app/_lib/indexed-db';
 import { useEffect, useRef, useCallback } from 'react';
 import { useRecoilState } from 'recoil';
 
+import WriteForm from 'app/_components/dirary/write-form';
 import TodoList from 'app/_components/dirary/todo-list';
-import { diariesState } from 'app/_lib/recoil';
+import { diariesState, onEditDiaryIdState } from 'app/_lib/recoil';
 
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
@@ -59,43 +60,64 @@ const MyDiaries = () => {
   };
 
   return (
-    <>
+    <div className={css.diariesContainer}>
       {diaries &&
         diaries.map((diary, idx) => {
           return (
-            <div
-              ref={diaries.indexOf(diary) === diaries.length - 1 ? lastDiaryRef : undefined}
+            <Diary
               key={diary.diary_id}
-              style={diaries.indexOf(diary) === diaries.length - 1 ? { paddingBottom: '150px' } : null}
-            >
-              <article className={css.diariesContainer}>
-                <span className={css.diariesTitle}>
-                  {diary.title}
-                  <div className={css.diariesButtonContainer}>
-                    <button type="button" className={global.button}>
-                      <EditRoundedIcon />
-                    </button>
-                    <button
-                      type="button"
-                      className={global.button}
-                      onClick={() => {
-                        removeDiaryHandler(diary.diary_id, idx);
-                      }}
-                    >
-                      <DeleteRoundedIcon />
-                    </button>
-                  </div>
-                  <div style={{ width: '1px', height: '1px' }} />
-                </span>
-                <div dangerouslySetInnerHTML={{ __html: diary.content_html }} className={css.diaryCotentContainer} />
-                <div>
-                  <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} diaryId={diary.diary_id} />
-                </div>
-              </article>
-              {diaries.indexOf(diary) === diaries.length - 1 ? null : <div className={global.divLine} style={{ width: 'calc(100% - 60px)' }} />}
-            </div>
+              lastDiaryRef={diaries.length - 1 === idx ? lastDiaryRef : null}
+              diary={diary}
+              idx={idx}
+              removeDiary={removeDiaryHandler}
+            />
           );
         })}
+    </div>
+  );
+};
+
+const Diary = ({ diary, idx, lastDiaryRef, removeDiary }) => {
+  const [onEditDiaryID, setOnEditDiaryID] = useRecoilState(onEditDiaryIdState);
+
+  return (
+    <>
+      <article ref={lastDiaryRef ? lastDiaryRef : null} className={css.diaryContainer}>
+        {onEditDiaryID === diary.diary_id ? (
+          <WriteForm style={{ marginLeft: '-15px' }} diary={diary} idx={idx} />
+        ) : (
+          <>
+            <span className={css.diaryTitle}>
+              {diary.title}
+              <div className={css.diaryButtonContainer}>
+                <button
+                  type="button"
+                  className={global.button}
+                  onClick={() => {
+                    setOnEditDiaryID(diary.diary_id);
+                  }}
+                >
+                  <EditRoundedIcon />
+                </button>
+                <button
+                  type="button"
+                  className={global.button}
+                  onClick={() => {
+                    removeDiary(diary.diary_id, idx);
+                  }}
+                >
+                  <DeleteRoundedIcon />
+                </button>
+              </div>
+              <div style={{ width: '1px', height: '1px' }} />
+            </span>
+            <div dangerouslySetInnerHTML={{ __html: diary.content_html }} className={css.diaryCotentContainer} />
+            <div>
+              <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} diaryId={diary.diary_id} />
+            </div>
+          </>
+        )}
+      </article>
     </>
   );
 };

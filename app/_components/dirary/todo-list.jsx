@@ -13,8 +13,9 @@ import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 import css from 'app/_components/dirary/todo-list.module.css';
 import global from 'app/globals.module.css';
 
-const TodoList = ({ todoList, setTodoList, diaryId }) => {
-  const isWrite = Boolean(setTodoList);
+const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
+  const isWrite = !diaryId;
+
   if (!isWrite) {
     const list = {
       extracted: new Map(todoList.extracted),
@@ -23,8 +24,7 @@ const TodoList = ({ todoList, setTodoList, diaryId }) => {
     [todoList, setTodoList] = useState(list);
   }
 
-  const { extracted } = todoList;
-  const { manual } = todoList;
+  const { extracted, manual } = todoList;
 
   const [keyNumber, setKeyNumber] = useState(0);
 
@@ -50,7 +50,7 @@ const TodoList = ({ todoList, setTodoList, diaryId }) => {
 
   return (
     <div
-      className={css.todoListContainer}
+      className={clsx(css.todoListContainer, { [css.editListContainer]: onEdit })}
       style={isWrite ? { paddingTop: '4px' } : extracted && extracted.size === 0 && manual && manual.size === 0 ? null : { marginTop: '40px' }}
     >
       {extracted && extracted.size > 0 && (
@@ -58,7 +58,9 @@ const TodoList = ({ todoList, setTodoList, diaryId }) => {
           <h4 className={css.todoCategoryTitle}>다이어리</h4>
           <ul className={css.todoList}>
             {Array.from(extracted).map((todo) => {
-              return <TodoItem key={todo[0]} todo={todo} place="extracted" setTodoList={setTodoList} isWrite={isWrite} diaryId={diaryId} />;
+              return (
+                <TodoItem key={todo[0]} todo={todo} place="extracted" setTodoList={setTodoList} isWrite={isWrite} diaryId={diaryId} onEdit={onEdit} />
+              );
             })}
           </ul>
         </>
@@ -196,7 +198,8 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
   return (
     <li className={clsx(css.todoItem, { [css.todoItemDeleted]: isDeleted })}>
       <JoinFullOutlinedIcon
-        style={{ fill: todo[1].done ? '#ffbe00' : '#ccc' }}
+        className={css.todoStatus}
+        style={{ fill: todo[1].done ? '#ffbe00' : null }}
         onClick={() => {
           updateTodoStatus(todo[0], !todo[1].done);
         }}

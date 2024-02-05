@@ -1,14 +1,15 @@
 'use client';
 
 import { useMemo, useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { useSetRecoilState } from 'recoil';
+
 import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react';
 import { Editor, createEditor, Range, Transforms, Text, Node } from 'slate';
 import { withHistory } from 'slate-history';
+import { jsx } from 'slate-hyperscript';
+import escapeHtml from 'escape-html';
 import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
 
-import { todoListState, slateIsEmptyState } from 'app/_lib/recoil';
 import { Button, Menu, Portal } from 'app/_components/dirary/slate-components';
 
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
@@ -16,23 +17,48 @@ import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import css from 'app/_components/dirary/slate-editor.module.css';
 
 const SlateEditor = forwardRef((props, ref) => {
+  const onEdit = Boolean(props.contentHtml);
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const [isMounted, setIsMounted] = useState(false);
-  const setTodoList = useSetRecoilState(todoListState);
-  const setSlateIsEmpty = useSetRecoilState(slateIsEmptyState);
-
   const isSelected = useRef(false);
 
-  useEffect(() => {
-    setIsMounted(true);
+  let initialValue;
+  if (onEdit) {
+    const document = new DOMParser().parseFromString(props.contentHtml, 'text/html');
+    const content = deserializeSlateToHtml(document.body);
 
+    initialValue = content;
+  } else {
+    initialValue = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            text: '',
+          },
+        ],
+      },
+    ];
+  }
+
+  useEffect(() => {
     document.addEventListener('selectionchange', browserSelectionChangeHandler);
 
     return () => {
       document.removeEventListener('selectionchange', browserSelectionChangeHandler);
     };
   }, []);
+
+  useEffect(() => {
+    if (editor) {
+      setIsMounted(true);
+      Transforms.select(editor, {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 0 },
+      });
+    }
+  }, [editor]);
 
   const dblClickHandler = () => {
     const selection = window.getSelection();
@@ -78,7 +104,7 @@ const SlateEditor = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     // 내부에 있는 code 블럭들을 모두 파악해서 TodoList 에 추가
-    extractTodoList() {
+    extractTodoList(setTodoList) {
       // editor의 value 또는 document를 사용하여 모든 노드에 접근
       const nodes = Node.descendants(editor);
       const diaryTodolist = new Map();
@@ -104,6 +130,7 @@ const SlateEditor = forwardRef((props, ref) => {
 
     extractDiary() {
       const [total] = Editor.nodes(editor);
+      console.log(total);
       if (!total) return;
 
       return serializeSlateToHtml(total[0]);
@@ -116,6 +143,7 @@ const SlateEditor = forwardRef((props, ref) => {
           focus: Editor.end(editor, []),
         },
       });
+      Editor.removeMark(editor, 'code');
     },
   }));
 
@@ -194,29 +222,19 @@ const SlateEditor = forwardRef((props, ref) => {
     const firstNode = nodes[0].children;
 
     if (nodes.length === 1 && firstNode.length === 1 && !firstNode[0].text) {
-      setSlateIsEmpty(true);
+      props.setSlateIsEmpty(true);
       return;
     }
 
-    setSlateIsEmpty(false);
+    props.setSlateIsEmpty(false);
   }, 300);
 
   return (
-    <Slate
-      className={css.slateContainer}
-      editor={editor}
-      initialValue={initialValue}
-      style={{
-        minHeight: '300px',
-      }}
-      onChange={() => {
-        checkEmpty();
-      }}
-    >
+    <Slate className={css.slateContainer} editor={editor} initialValue={initialValue}>
       <HoveringToolbar />
       <Editable
         id="slateEditor"
-        className={clsx(css.slateEditor, { [css.selected]: isSelected.current })}
+        className={clsx(css.slateEditor, { [css.editEditor]: onEdit })}
         renderLeaf={(props) => <Leaf {...props} />}
         placeholder="내용..."
         readOnly={!isMounted}
@@ -224,6 +242,7 @@ const SlateEditor = forwardRef((props, ref) => {
           dblClickHandler();
         }}
         onKeyDown={(event) => {
+          if (!event.nativeEvent.isComposing) checkEmpty();
           keyDownHandler(event);
         }}
       />
@@ -244,8 +263,10 @@ const toggleMark = async (editor, format) => {
 };
 
 const isMarkActive = (editor, format) => {
-  const marks = Editor.marks(editor);
-  return marks ? marks[format] === true : false;
+  try {
+    const marks = Editor.marks(editor);
+    return marks ? marks[format] === true : false;
+  } catch {}
 };
 
 const Leaf = ({ attributes, children, leaf }) => {
@@ -275,7 +296,6 @@ const HoveringToolbar = () => {
     }
 
     const domSelection = window.getSelection();
-    console.log(domSelection);
     if (domSelection) {
       const domRange = domSelection.getRangeAt(0);
       const rect = domRange.getBoundingClientRect();
@@ -314,7 +334,6 @@ const FormatButton = ({ format }) => {
     >
       {isMarkActive(editor, format) ? (
         <>
-          {/* 선명한 아이콘 */}
           <ClearRoundedIcon
             sx={{
               position: 'relative',
@@ -324,7 +343,6 @@ const FormatButton = ({ format }) => {
         </>
       ) : (
         <>
-          {/* 선명한 아이콘 */}
           <DriveFileRenameOutlineRoundedIcon
             sx={{
               position: 'relative',
@@ -337,20 +355,11 @@ const FormatButton = ({ format }) => {
   );
 };
 
-const initialValue = [
-  {
-    type: 'paragraph',
-    children: [
-      {
-        text: '',
-      },
-    ],
-  },
-];
-
 const serializeSlateToHtml = (node) => {
   if (Text.isText(node)) {
-    if (node.code) return `<code>${node.text}</code>`;
+    const string = escapeHtml(node.text);
+    if (node.code) return `<code>${string}</code>`;
+
     return node.text;
   }
 
@@ -361,6 +370,38 @@ const serializeSlateToHtml = (node) => {
   }
 
   return children;
+};
+
+const deserializeSlateToHtml = (el, markAttributes = {}) => {
+  if (el.nodeType === window.Node.TEXT_NODE) {
+    return jsx('text', markAttributes, el.textContent);
+  }
+
+  if (el.nodeType !== window.Node.ELEMENT_NODE) {
+    return null;
+  }
+
+  const nodeAttributes = { ...markAttributes };
+  if (el.nodeName === 'CODE') nodeAttributes.code = true;
+
+  const children = Array.from(el.childNodes)
+    .map((node) => deserializeSlateToHtml(node, nodeAttributes))
+    .flat();
+
+  if (children.length === 0) {
+    children.push(jsx('text', nodeAttributes, ''));
+  }
+
+  switch (el.nodeName) {
+    case 'BODY':
+      return jsx('fragment', {}, children);
+    case 'BR':
+      return '\n';
+    case 'P':
+      return jsx('element', { type: 'paragraph' }, children);
+    default:
+      return children;
+  }
 };
 
 export default SlateEditor;

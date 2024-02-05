@@ -78,3 +78,25 @@
   width: 27px;
   height: 27px;
 }
+
+.editContainer {
+  margin-left: -15px;
+
+  background-color: #333;
+}
+
+.editContainer::before {
+  opacity: 0.05;
+}
+
+.editContainer .form > * {
+  color: #fff;
+}
+
+.editContainer .buttonContainer > button > svg {
+  fill: #aaa;
+}
+
+.editContainer .buttonContainer > button:hover > svg {
+  fill: #fff;
+}

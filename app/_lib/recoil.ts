@@ -5,12 +5,7 @@ export const diariesState = atom({
   default: [],
 });
 
-export const todoListState = atom({
-  key: 'todoListState',
-  default: { extracted: [], manual: [] },
-});
-
-export const slateIsEmptyState = atom({
-  key: 'slateIsEmptyState',
-  default: true,
+export const onEditDiaryIdState = atom({
+  key: 'onEditDiaryIdState',
+  default: null,
 });

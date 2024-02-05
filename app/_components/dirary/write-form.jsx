@@ -1,11 +1,11 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import clsx from 'clsx';
 
 import { getServerTime } from 'app/_lib/action/time';
-import { todoListState, slateIsEmptyState, diariesState } from 'app/_lib/recoil';
+import { diariesState, onEditDiaryIdState } from 'app/_lib/recoil';
 import indexedDb from 'app/_lib/indexed-db';
 
 import SlateEditor from 'app/_components/dirary/slate-editor';
@@ -16,17 +16,21 @@ import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import css from 'app/_components/dirary/write-form.module.css';
 import global from 'app/globals.module.css';
 
-const WriteForm = () => {
+const WriteForm = ({ diary, idx }) => {
+  const onEdit = Boolean(diary);
+
   const editorRef = useRef();
   const [timeNow, setTimeNow] = useState(null);
 
-  const [diaryTitle, setDiaryTitle] = useState('');
-  const [todoList, setTodoList] = useRecoilState(todoListState);
+  const [diaryTitle, setDiaryTitle] = useState(onEdit ? diary.title : '');
+  const [todoList, setTodoList] = useState(
+    onEdit ? { extracted: new Map(diary.extracted_todos), manual: new Map(diary.manual_todos) } : { extracted: [], manual: [] },
+  );
+  const [slateIsEmpty, setSlateIsEmpty] = useState(!onEdit);
 
-  const slateIsEmpty = useRecoilValue(slateIsEmptyState);
-
-  const { addDiary, readDiaries } = indexedDb('Diaries');
+  const { addDiary, readDiaries, updateDiary } = indexedDb('Diaries');
   const setDiaries = useSetRecoilState(diariesState);
+  const setOnEditDiaryID = useSetRecoilState(onEditDiaryIdState);
 
   useEffect(() => {
     getServerTime().then((result) => {
@@ -41,25 +45,56 @@ const WriteForm = () => {
   }, []);
 
   const extractTodoList = () => {
-    editorRef.current.extractTodoList();
+    editorRef.current.extractTodoList(setTodoList);
   };
 
   const saveDiary = () => {
     const contentHtml = editorRef.current.extractDiary();
 
-    addDiary({
-      title: diaryTitle ? diaryTitle : timeNow,
-      content_html: contentHtml,
-      extracted_todos: Array.from(todoList.extracted.entries()),
-      manual_todos: Array.from(todoList.manual.entries()),
-      is_secret: false,
-    }).then(() => {
-      setDiaryTitle('');
-      editorRef.current.emptyDiary();
-      setTodoList({ extracted: [], manual: [] });
+    if (onEdit) {
+      const extracted = Array.from(todoList.extracted.entries());
+      const manual = Array.from(todoList.manual.entries());
 
-      updateMyDiaries();
-    });
+      updateDiary({
+        diary_id: diary.diary_id,
+        title: diaryTitle ? diaryTitle : timeNow,
+        content_html: contentHtml,
+        extracted_todos: extracted,
+        manual_todos: manual,
+        created_at: diary.created_at,
+      }).then(() => {
+        setOnEditDiaryID(null);
+
+        setDiaries((prevDiaries) => {
+          const updatedDiaries = [...prevDiaries];
+
+          updatedDiaries[idx] = {
+            ...diary,
+            title: diaryTitle ? diaryTitle : timeNow,
+            content_html: contentHtml,
+            extracted_todos: extracted,
+            manual_todos: manual,
+          };
+
+          return updatedDiaries;
+        });
+      });
+
+      console.log(idx);
+    } else {
+      addDiary({
+        title: diaryTitle ? diaryTitle : timeNow,
+        content_html: contentHtml,
+        extracted_todos: Array.from(todoList.extracted.entries()),
+        manual_todos: Array.from(todoList.manual.entries()),
+        is_secret: false,
+      }).then(() => {
+        setDiaryTitle('');
+        editorRef.current.emptyDiary();
+        setTodoList({ extracted: [], manual: [] });
+        updateMyDiaries();
+      });
+    }
 
     // updateDiary({ id: 1, title: 'test2', content: 'helloworld!2');
   };
@@ -94,7 +129,7 @@ const WriteForm = () => {
   };
 
   return (
-    <div className={css.newWriteContainer}>
+    <div className={clsx(css.newWriteContainer, { [css.editContainer]: onEdit })}>
       <form className={css.form}>
         <input
           value={diaryTitle}
@@ -114,11 +149,11 @@ const WriteForm = () => {
         />
 
         <div className={global.divLine} />
-        <SlateEditor ref={editorRef} />
+        <SlateEditor ref={editorRef} setSlateIsEmpty={setSlateIsEmpty} contentHtml={onEdit ? diary.content_html : null} />
         <div className={global.divLine} />
 
         <section className={css.bottom}>
-          <TodoList todoList={todoList} setTodoList={setTodoList} />
+          <TodoList todoList={todoList} setTodoList={setTodoList} onEdit={onEdit} />
           <fieldset className={css.buttonContainer}>
             <button type="button" className={clsx(global.button, { [global.disabledButton]: slateIsEmpty })} onClick={extractTodoList}>
               <LowPriorityRoundedIcon style={{ width: '1.7rem', height: '1.7rem', marginRight: '10px' }} />

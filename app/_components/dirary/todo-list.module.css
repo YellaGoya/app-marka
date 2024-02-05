@@ -11,7 +11,7 @@
 }
 
 .todoCategoryTitle > button {
-  margin-top: -1px;
+  margin-top: -2px;
   margin-left: 3px;
 }
 
@@ -71,6 +71,10 @@
   opacity: 1;
 }
 
+.todoStatus {
+  fill: #ccc;
+}
+
 .todoInput {
   width: 100%;
   height: 32px;
@@ -115,4 +119,32 @@
 
 .todoDelete:hover > svg {
   fill: #000;
+}
+
+.editListContainer .todoCategoryTitle {
+  color: #aaa;
+}
+
+.editListContainer .todoCategoryTitle > button > svg {
+  fill: #aaa;
+}
+
+.editListContainer .todoCategoryTitle > button:hover > svg {
+  fill: #fff;
+}
+
+.editListContainer .todoInput {
+  color: #aaa;
+}
+
+.editListContainer .todoStatus {
+  fill: #666;
+}
+
+.editListContainer .todoDelete > svg {
+  fill: #666;
+}
+
+.editListContainer .todoDelete:hover > svg {
+  fill: #fff;
 }

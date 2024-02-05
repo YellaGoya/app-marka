@@ -61,6 +61,18 @@ const indexedDb = (storeName: string) => {
   const updateDiary = async (diary: Diary): Promise<void> => {
     const db = await getDb();
 
+    let time;
+    try {
+      time = await getServerTime();
+    } catch (error) {
+      console.error('Failed to fetch server time:', error);
+
+      const date = new Date();
+      time = date.toISOString();
+    }
+
+    diary.updated_at = time;
+
     const tx = db.transaction(storeName, 'readwrite');
     const store = tx.objectStore(storeName);
     await store.put(diary);

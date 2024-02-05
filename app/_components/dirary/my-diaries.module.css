@@ -1,24 +1,40 @@
 .diariesContainer {
-  position: relative;
-
   max-width: 1000px;
   width: calc(100vw - 30px);
-  height: fit-content;
+  padding: 0 15px;
 
-  margin: 50px auto;
-  padding: 15px;
-
-  overflow: hidden;
+  margin: 0 auto;
 }
 
-.diariesTitle {
+.diaryContainer {
+  position: relative;
+
+  height: fit-content;
+
+  margin-top: 60px;
+}
+
+.diaryContainer:not(:last-child):after {
+  content: "";
+  display: block;
+  margin-top: 60px;
+
+  height: 1px;
+  background-color: #e0e0e0;
+}
+
+.diaryContainer:last-child {
+  padding-bottom: 150px;
+}
+
+.diaryTitle {
   padding-bottom: 10px;
 
   font-size: 1.2rem;
   font-weight: 700;
 }
 
-.diariesTitle:hover > div:first-child {
+.diaryTitle:hover > div:first-child {
   height: 27px;
   margin-bottom: 8px;
 
@@ -26,7 +42,7 @@
   opacity: 1;
 }
 
-.diariesButtonContainer {
+.diaryButtonContainer {
   display: block;
   width: fit-content;
   height: 0px;
@@ -51,26 +67,30 @@
     margin-bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.diariesButtonContainer > button > svg {
+.diaryButtonContainer > button > svg {
   width: 20px;
   height: 20px;
 }
 
-.diariesButtonContainer > button:first-child {
+.diaryButtonContainer > button:first-child {
   margin-right: 4px;
 }
 
 .diaryCotentContainer {
   font-family: "Malgun Gothic";
   font-size: 18px;
-  line-height: 1.56;
+  line-height: 1.73;
+}
+
+.diaryCotentContainer *:not(:last-child) {
+  margin-bottom: 10px;
 }
 
 .diaryCotentContainer code {
-  padding: 2px 9px 2px 9px;
+  padding: 1px 9px 2px 9px;
 
   font-family: "Malgun Gothic";
-  background-color: #cbcbd6;
+  background-color: #ddd;
 
   border-radius: 8px;
 }
