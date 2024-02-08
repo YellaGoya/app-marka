@@ -7,7 +7,6 @@ import { Editor, createEditor, Range, Transforms, Text, Node } from 'slate';
 import { withHistory } from 'slate-history';
 import { jsx } from 'slate-hyperscript';
 import escapeHtml from 'escape-html';
-import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
 
 import { Button, Menu, Portal } from 'app/_components/dirary/slate-components';
@@ -23,26 +22,27 @@ const SlateEditor = forwardRef((props, ref) => {
   const [isMounted, setIsMounted] = useState(false);
   const isSelected = useRef(false);
 
-  let initialValue;
-  if (onEdit) {
-    const document = new DOMParser().parseFromString(props.contentHtml, 'text/html');
-    const content = deserializeSlateToHtml(document.body);
-
-    initialValue = content;
-  } else {
-    initialValue = [
-      {
-        type: 'paragraph',
-        children: [
-          {
-            text: '',
-          },
-        ],
-      },
-    ];
-  }
+  const [initialValue, setInitialValue] = useState(null);
 
   useEffect(() => {
+    if (onEdit) {
+      const document = new DOMParser().parseFromString(props.contentHtml, 'text/html');
+      const content = deserializeSlateToHtml(document.body);
+
+      setInitialValue(content);
+    } else {
+      setInitialValue([
+        {
+          type: 'paragraph',
+          children: [
+            {
+              text: '',
+            },
+          ],
+        },
+      ]);
+    }
+
     document.addEventListener('selectionchange', browserSelectionChangeHandler);
 
     return () => {
@@ -214,23 +214,32 @@ const SlateEditor = forwardRef((props, ref) => {
     }
   };
 
-  const checkEmpty = useDebouncedCallback(() => {
-    const [total] = Editor.nodes(editor);
-    if (!total) return;
+  const checkEmpty = () => {
+    const nodes = editor.children;
 
-    const nodes = total[0].children;
-    const firstNode = nodes[0].children;
-
-    if (nodes.length === 1 && firstNode.length === 1 && !firstNode[0].text) {
-      props.setSlateIsEmpty(true);
+    if (nodes.length !== 1) {
+      props.setSlateIsEmpty(false);
       return;
     }
 
-    props.setSlateIsEmpty(false);
-  }, 300);
+    const firstLine = nodes[0].children;
 
-  return (
-    <Slate className={css.slateContainer} editor={editor} initialValue={initialValue}>
+    if (firstLine.length !== 1 || firstLine[0].text) {
+      props.setSlateIsEmpty(false);
+      return;
+    }
+
+    if (!firstLine[0].text) props.setSlateIsEmpty(true);
+  };
+
+  return initialValue ? (
+    <Slate
+      editor={editor}
+      initialValue={initialValue}
+      onChange={() => {
+        checkEmpty();
+      }}
+    >
       <HoveringToolbar />
       <Editable
         id="slateEditor"
@@ -242,11 +251,13 @@ const SlateEditor = forwardRef((props, ref) => {
           dblClickHandler();
         }}
         onKeyDown={(event) => {
-          if (!event.nativeEvent.isComposing) checkEmpty();
+          // if (!event.nativeEvent.isComposing) checkEmpty();
           keyDownHandler(event);
         }}
       />
     </Slate>
+  ) : (
+    <div className={css.slateEditor} />
   );
 });
 
@@ -301,8 +312,8 @@ const HoveringToolbar = () => {
       const rect = domRange.getBoundingClientRect();
       if (el) {
         el.style.opacity = '1';
-        el.style.top = `${rect.bottom + window.pageYOffset - el.offsetHeight + 10}px`;
-        el.style.left = `${rect.left + window.pageXOffset - 29}px`;
+        el.style.top = `${rect.bottom + window.pageYOffset - el.offsetHeight + 45}px`;
+        el.style.left = `${rect.left + window.pageXOffset}px`;
       }
     }
   });

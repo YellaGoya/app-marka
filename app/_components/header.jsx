@@ -16,7 +16,7 @@ const Header = () => {
         <Link href="/" className={clsx({ [css.selectedLink]: pathname === '/' })}>
           <GiteRoundedIcon />
         </Link>
-        <Link href="/setting/login" className={clsx({ [css.selectedLink]: pathname === '/setting/login' })}>
+        <Link href="/setting" className={clsx({ [css.selectedLink]: pathname === '/setting' })}>
           <SettingsRoundedIcon />
         </Link>
       </nav>

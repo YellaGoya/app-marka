@@ -1,13 +1,9 @@
 .newWriteContainer {
   position: relative;
 
-  max-width: 1000px;
-  width: calc(100vw - 30px);
   height: fit-content;
 
-  margin: 0 auto;
   margin-bottom: 75px;
-
   padding: 15px;
 
   border-radius: 0.8rem;
@@ -18,6 +14,14 @@
     rgba(17, 17, 26, 0.08) 0px 16px 40px;
 
   overflow: hidden;
+
+  opacity: 0;
+
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.loadedContainer {
+  opacity: 1;
 }
 
 .newWriteContainer::before {
@@ -49,7 +53,7 @@
   width: 100%;
 
   color: #202020;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 900;
 
   overflow: hidden;
@@ -74,14 +78,15 @@
   border: none;
 }
 
-.save > svg {
-  width: 27px;
-  height: 27px;
+.buttonContainer > button:first-child > svg {
+  width: 1.7rem;
+  height: 1.7rem;
+  margin-right: 10px;
 }
 
 .editContainer {
+  width: calc(100% + 30px);
   margin-left: -15px;
-
   background-color: #333;
 }
 

@@ -2,10 +2,10 @@
 
 import { useFormState, useFormStatus } from 'react-dom';
 import { putOnWaitingList } from 'app/_lib/action/user';
-
 import { test } from 'app/_lib/action/user';
+import Button from 'app/_components/common/button';
 
-const RegistForm = () => {
+const RegistForm = ({ backward }) => {
   const initialState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(putOnWaitingList, initialState);
 
@@ -54,6 +54,14 @@ const RegistForm = () => {
       >
         test!!!
       </button>
+
+      <Button
+        onClick={() => {
+          backward();
+        }}
+      >
+        뒤로
+      </Button>
     </div>
   );
 };

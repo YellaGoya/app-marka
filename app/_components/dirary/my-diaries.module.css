@@ -1,6 +1,4 @@
 .diariesContainer {
-  max-width: 1000px;
-  width: calc(100vw - 30px);
   padding: 0 15px;
 
   margin: 0 auto;

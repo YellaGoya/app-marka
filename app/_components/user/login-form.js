@@ -1,9 +1,11 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { authenticate } from 'app/_lib/action/user';
 
-const LoginForm = () => {
+import { authenticate } from 'app/_lib/action/user';
+import Button from 'app/_components/common/button';
+
+const LoginForm = ({ backward }) => {
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
   // email, password를 받는 로그인 Form
   return (
@@ -16,6 +18,13 @@ const LoginForm = () => {
       <div aria-live="polite" aria-atomic="true">
         {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
       </div>
+      <Button
+        onClick={() => {
+          backward();
+        }}
+      >
+        뒤로
+      </Button>
     </div>
   );
 };

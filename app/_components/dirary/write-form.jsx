@@ -10,38 +10,58 @@ import indexedDb from 'app/_lib/indexed-db';
 
 import SlateEditor from 'app/_components/dirary/slate-editor';
 import TodoList from 'app/_components/dirary/todo-list';
+import Button from 'app/_components/common/button';
 
 import LowPriorityRoundedIcon from '@mui/icons-material/LowPriorityRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import css from 'app/_components/dirary/write-form.module.css';
 import global from 'app/globals.module.css';
 
-const WriteForm = ({ diary, idx }) => {
-  const onEdit = Boolean(diary);
+const WriteForm = ({ diaryId, idx }) => {
+  const onEdit = Boolean(diaryId);
 
   const editorRef = useRef();
+
   const [timeNow, setTimeNow] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const [diaryTitle, setDiaryTitle] = useState(onEdit ? diary.title : '');
-  const [todoList, setTodoList] = useState(
-    onEdit ? { extracted: new Map(diary.extracted_todos), manual: new Map(diary.manual_todos) } : { extracted: [], manual: [] },
-  );
+  const [diaryTitle, setDiaryTitle] = useState('');
+  const [todoList, setTodoList] = useState({ extracted: [], manual: [] });
   const [slateIsEmpty, setSlateIsEmpty] = useState(!onEdit);
+  const [diary, setDiary] = useState(null);
 
-  const { addDiary, readDiaries, updateDiary } = indexedDb('Diaries');
   const setDiaries = useSetRecoilState(diariesState);
   const setOnEditDiaryID = useSetRecoilState(onEditDiaryIdState);
 
-  useEffect(() => {
-    getServerTime().then((result) => {
-      const serverTime = new Date(result);
-      const year = serverTime.getFullYear();
-      const month = serverTime.getMonth() + 1;
-      const day = serverTime.getDate();
-      const dateString = `${year}. ${month}. ${day}.`;
+  const { addDiary, readDiary, readDiaries, updateDiary } = indexedDb('Diaries');
 
-      setTimeNow(dateString);
-    });
+  useEffect(() => {
+    getServerTime()
+      .then((result) => {
+        const serverTime = new Date(result);
+        const year = serverTime.getFullYear();
+        const month = serverTime.getMonth() + 1;
+        const day = serverTime.getDate();
+        const dateString = `${year}. ${month}. ${day}.`;
+
+        setTimeNow(dateString);
+      })
+      .catch(() => {
+        setOnEditDiaryID(null);
+      });
+
+    if (onEdit) {
+      readDiary(diaryId).then((diary) => {
+        setDiary(diary);
+
+        setDiaryTitle(diary.title);
+        setTodoList({ extracted: new Map(diary.extracted_todos), manual: new Map(diary.manual_todos) });
+
+        setIsLoaded(true);
+      });
+    } else {
+      setIsLoaded(true);
+    }
   }, []);
 
   const extractTodoList = () => {
@@ -79,8 +99,6 @@ const WriteForm = ({ diary, idx }) => {
           return updatedDiaries;
         });
       });
-
-      console.log(idx);
     } else {
       addDiary({
         title: diaryTitle ? diaryTitle : timeNow,
@@ -129,7 +147,7 @@ const WriteForm = ({ diary, idx }) => {
   };
 
   return (
-    <div className={clsx(css.newWriteContainer, { [css.editContainer]: onEdit })}>
+    <div className={clsx(css.newWriteContainer, { [css.editContainer]: onEdit }, { [css.loadedContainer]: isLoaded })}>
       <form className={css.form}>
         <input
           value={diaryTitle}
@@ -149,18 +167,19 @@ const WriteForm = ({ diary, idx }) => {
         />
 
         <div className={global.divLine} />
-        <SlateEditor ref={editorRef} setSlateIsEmpty={setSlateIsEmpty} contentHtml={onEdit ? diary.content_html : null} />
+        {diary || !onEdit ? <SlateEditor ref={editorRef} setSlateIsEmpty={setSlateIsEmpty} contentHtml={diary ? diary.content_html : null} /> : null}
+
         <div className={global.divLine} />
 
         <section className={css.bottom}>
           <TodoList todoList={todoList} setTodoList={setTodoList} onEdit={onEdit} />
           <fieldset className={css.buttonContainer}>
-            <button type="button" className={clsx(global.button, { [global.disabledButton]: slateIsEmpty })} onClick={extractTodoList}>
-              <LowPriorityRoundedIcon style={{ width: '1.7rem', height: '1.7rem', marginRight: '10px' }} />
-            </button>
-            <button type="button" className={clsx(global.button, css.save, { [global.disabledButton]: slateIsEmpty })} onClick={saveDiary}>
+            <Button disabled={slateIsEmpty} onClick={extractTodoList}>
+              <LowPriorityRoundedIcon />
+            </Button>
+            <Button disabled={slateIsEmpty} onClick={saveDiary}>
               <SaveRoundedIcon />
-            </button>
+            </Button>
           </fieldset>
         </section>
       </form>

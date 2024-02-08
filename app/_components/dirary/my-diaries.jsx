@@ -7,12 +7,12 @@ import { useRecoilState } from 'recoil';
 import WriteForm from 'app/_components/dirary/write-form';
 import TodoList from 'app/_components/dirary/todo-list';
 import { diariesState, onEditDiaryIdState } from 'app/_lib/recoil';
+import Button from 'app/_components/common/button';
 
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 import css from 'app/_components/dirary/my-diaries.module.css';
-import global from 'app/globals.module.css';
 
 const MyDiaries = () => {
   const { readDiaries, removeDiary } = indexedDb('Diaries');
@@ -80,34 +80,36 @@ const MyDiaries = () => {
 const Diary = ({ diary, idx, lastDiaryRef, removeDiary }) => {
   const [onEditDiaryID, setOnEditDiaryID] = useRecoilState(onEditDiaryIdState);
 
+  const diaryRef = useRef(null);
+
+  useEffect(() => {
+    diaryRef.current.style.minHeight = `${diaryRef.current.getBoundingClientRect().height}px`;
+  }, [diaryRef]);
+
   return (
     <>
-      <article ref={lastDiaryRef ? lastDiaryRef : null} className={css.diaryContainer}>
+      <article ref={diaryRef} className={css.diaryContainer}>
         {onEditDiaryID === diary.diary_id ? (
-          <WriteForm style={{ marginLeft: '-15px' }} diary={diary} idx={idx} />
+          <WriteForm diaryId={diary.diary_id} idx={idx} />
         ) : (
-          <>
+          <div ref={lastDiaryRef ? lastDiaryRef : null}>
             <span className={css.diaryTitle}>
               {diary.title}
               <div className={css.diaryButtonContainer}>
-                <button
-                  type="button"
-                  className={global.button}
+                <Button
                   onClick={() => {
                     setOnEditDiaryID(diary.diary_id);
                   }}
                 >
                   <EditRoundedIcon />
-                </button>
-                <button
-                  type="button"
-                  className={global.button}
+                </Button>
+                <Button
                   onClick={() => {
                     removeDiary(diary.diary_id, idx);
                   }}
                 >
                   <DeleteRoundedIcon />
-                </button>
+                </Button>
               </div>
               <div style={{ width: '1px', height: '1px' }} />
             </span>
@@ -115,7 +117,7 @@ const Diary = ({ diary, idx, lastDiaryRef, removeDiary }) => {
             <div>
               <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} diaryId={diary.diary_id} />
             </div>
-          </>
+          </div>
         )}
       </article>
     </>

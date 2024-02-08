@@ -5,13 +5,13 @@ import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
 
 import indexedDb from 'app/_lib/indexed-db';
+import Button from 'app/_components/common/button';
 
 import JoinFullOutlinedIcon from '@mui/icons-material/JoinFullOutlined';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 
 import css from 'app/_components/dirary/todo-list.module.css';
-import global from 'app/globals.module.css';
 
 const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
   const isWrite = !diaryId;
@@ -70,15 +70,9 @@ const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
         <span className={css.todoCategoryTitle} style={extracted && extracted.size > 0 ? { marginTop: '16px' } : null}>
           <span>추가</span>
           {isWrite && (
-            <button
-              type="button"
-              className={global.button}
-              onClick={() => {
-                newTodoItem();
-              }}
-            >
+            <Button onClick={newTodoItem}>
               <AddBoxRoundedIcon />
-            </button>
+            </Button>
           )}
         </span>
       )}
@@ -197,25 +191,25 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
 
   return (
     <li className={clsx(css.todoItem, { [css.todoItemDeleted]: isDeleted })}>
-      <JoinFullOutlinedIcon
+      <Button
         className={css.todoStatus}
-        style={{ fill: todo[1].done ? '#ffbe00' : null }}
         onClick={() => {
           updateTodoStatus(todo[0], !todo[1].done);
         }}
-      />
+      >
+        <JoinFullOutlinedIcon style={{ fill: todo[1].done ? '#ffbe00' : null }} />
+      </Button>
       <div className={clsx(css.todoTitleContainer, { [css.todoTitleNotEditing]: !isEditing })}>
         {isWrite && (
-          <button
+          <Button
             className={css.todoDelete}
-            type="button"
             onClick={() => {
               setIsDeleted(true);
               deleteHandler(todo[0]);
             }}
           >
             <DeleteRoundedIcon />
-          </button>
+          </Button>
         )}
 
         {isWrite && isEditing ? (

@@ -9,6 +9,15 @@ export type User = {
   status: string;
 };
 
+export type Waiting = {
+  errors?: {
+    nickname?: string[];
+    email?: string[];
+    password?: string[];
+  };
+  message?: string | null;
+};
+
 type Todo = { done: boolean; text: string };
 type TodoList = [string, Todo];
 

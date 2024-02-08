@@ -1,11 +1,11 @@
 import WriteForm from 'app/_components/dirary/write-form';
 import MyDiaries from 'app/_components/dirary/my-diaries';
 
-import css from 'app/page.module.css';
+import global from 'app/globals.module.css';
 
 const Home = () => {
   return (
-    <main className={css.main}>
+    <main className={global.main}>
       <WriteForm />
       <MyDiaries />
     </main>
