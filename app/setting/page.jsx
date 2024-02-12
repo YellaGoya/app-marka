@@ -1,11 +1,13 @@
-import Greeting from 'app/_components/user/greeting';
-import Options from 'app/_components/user/options';
+import Greeting from 'components/user/greeting';
+import Options from 'components/user/options';
+import WaitingConfirm from 'components/user/waiting-confirm';
 
 const Setting = () => {
   return (
     <main>
       <Options />
       <Greeting />
+      <WaitingConfirm />
     </main>
   );
 };

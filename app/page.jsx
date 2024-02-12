@@ -1,5 +1,5 @@
-import WriteForm from 'app/_components/dirary/write-form';
-import MyDiaries from 'app/_components/dirary/my-diaries';
+import WriteForm from 'components/dirary/write-form';
+import MyDiaries from 'components/dirary/my-diaries';
 
 import global from 'app/globals.module.css';
 

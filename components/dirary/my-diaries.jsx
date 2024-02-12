@@ -1,42 +1,52 @@
 'use client';
 
-import indexedDb from 'app/_lib/indexed-db';
 import { useEffect, useRef, useCallback } from 'react';
 import { useRecoilState } from 'recoil';
+import { useSession } from 'next-auth/react';
 
-import WriteForm from 'app/_components/dirary/write-form';
-import TodoList from 'app/_components/dirary/todo-list';
-import { diariesState, onEditDiaryIdState } from 'app/_lib/recoil';
-import Button from 'app/_components/common/button';
+import * as clientDB from 'lib/indexed-db';
+import * as serverDB from 'lib/api/diary';
+import { diariesState, onEditDiaryIdState } from 'lib/recoil';
+
+import WriteForm from 'components/dirary/write-form';
+import TodoList from 'components/dirary/todo-list';
+import Button from 'components/common/button';
 
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
-import css from 'app/_components/dirary/my-diaries.module.css';
+import css from 'components/dirary/my-diaries.module.css';
 
 const MyDiaries = () => {
-  const { readDiaries, removeDiary } = indexedDb('Diaries');
+  const { status } = useSession();
+
   const [diaries, setDiaries] = useRecoilState(diariesState);
 
   useEffect(() => {
-    getMyDiaries(false);
-  }, []);
+    if (status !== 'loading') getMyDiaries(false);
+  }, [status]);
 
   const observer = useRef();
 
-  const lastDiaryRef = useCallback((node) => {
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        getMyDiaries();
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, []);
+  const lastDiaryRef = useCallback(
+    (node) => {
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          getMyDiaries();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [status],
+  );
 
-  const getMyDiaries = useCallback(async (isLazyLoading = true) => {
+  const getMyDiaries = async (isLazyLoading = true) => {
+    console.log('getMyDiaries', status, isLazyLoading);
+    if (status === 'loading') return;
+
     try {
-      const newDiaries = await readDiaries(isLazyLoading);
+      const newDiaries = status === 'authenticated' ? await serverDB.readDiaries(isLazyLoading) : await clientDB.readDiaries(isLazyLoading);
 
       if (isLazyLoading)
         setDiaries((prevDiaries) => {
@@ -46,10 +56,10 @@ const MyDiaries = () => {
     } catch {
       return new Error('Error: getMyDiaries.');
     }
-  });
+  };
 
   const removeDiaryHandler = (diaryId, idx) => {
-    removeDiary(diaryId).then(() => {
+    clientDB.removeDiary(diaryId).then(() => {
       setDiaries((prevDiaries) => {
         const removedDiaries = [...prevDiaries];
         removedDiaries.splice(idx, 1);

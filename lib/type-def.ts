@@ -1,17 +1,14 @@
 export type User = {
   user_id: number;
-  nickname: string;
+  tag: string;
   email: string;
   password: string;
   created_at: Date;
-  updated_at: Date;
-  last_login: Date;
-  status: string;
 };
 
 export type Waiting = {
   errors?: {
-    nickname?: string[];
+    tag?: string[];
     email?: string[];
     password?: string[];
   };
@@ -21,8 +18,19 @@ export type Waiting = {
 type Todo = { done: boolean; text: string };
 type TodoList = [string, Todo];
 
-export type Diary = {
-  diary_id?: number;
+export type DiaryClient = {
+  diary_id?: number | string;
+  title: string;
+  content_html: string;
+  created_at?: string;
+  updated_at?: string;
+  extracted_todos: Array<TodoList>;
+  manual_todos: Array<TodoList>;
+  is_secret: boolean;
+};
+
+export type DiaryServer = {
+  diary_id?: string;
   user_id?: number;
   title: string;
   content_html: string;

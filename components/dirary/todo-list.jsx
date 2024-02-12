@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
 
-import indexedDb from 'app/_lib/indexed-db';
-import Button from 'app/_components/common/button';
+import { updateStatus } from 'lib/indexed-db';
+import Button from 'components/common/button';
 
 import JoinFullOutlinedIcon from '@mui/icons-material/JoinFullOutlined';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 
-import css from 'app/_components/dirary/todo-list.module.css';
+import css from 'components/dirary/todo-list.module.css';
 
 const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
   const isWrite = !diaryId;
@@ -28,25 +28,23 @@ const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
 
   const [keyNumber, setKeyNumber] = useState(0);
 
-  let newTodoItem;
-  if (isWrite)
-    newTodoItem = () => {
-      setTodoList((prevTodoList) => {
-        const list = new Map(prevTodoList.manual);
+  const newTodoItem = useCallback(() => {
+    setTodoList((prevTodoList) => {
+      const list = new Map(prevTodoList.manual);
 
-        list.set(`manual-${keyNumber}`, {
-          done: false,
-          text: '새로운 일',
-        });
-
-        return {
-          ...prevTodoList,
-          manual: list,
-        };
+      list.set(`manual-${keyNumber}`, {
+        done: false,
+        text: '새로운 일',
       });
 
-      setKeyNumber((prevKey) => prevKey + 1);
-    };
+      return {
+        ...prevTodoList,
+        manual: list,
+      };
+    });
+
+    setKeyNumber((prevKey) => prevKey + 1);
+  }, []);
 
   return (
     <div
@@ -96,11 +94,6 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
   const [todoTitle, setTodoTitle] = useState(todo[1].text);
 
   const titleRef = useRef(null);
-
-  let updateStatus;
-  if (!isWrite) {
-    ({ updateStatus } = indexedDb('Diaries'));
-  }
 
   useEffect(() => {
     if (isEditing) {

@@ -9,11 +9,11 @@ import { jsx } from 'slate-hyperscript';
 import escapeHtml from 'escape-html';
 import clsx from 'clsx';
 
-import { Button, Menu, Portal } from 'app/_components/dirary/slate-components';
+import { Button, Menu, Portal } from 'components/dirary/slate-components';
 
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
-import css from 'app/_components/dirary/slate-editor.module.css';
+import css from 'components/dirary/slate-editor.module.css';
 
 const SlateEditor = forwardRef((props, ref) => {
   const onEdit = Boolean(props.contentHtml);
@@ -130,7 +130,6 @@ const SlateEditor = forwardRef((props, ref) => {
 
     extractDiary() {
       const [total] = Editor.nodes(editor);
-      console.log(total);
       if (!total) return;
 
       return serializeSlateToHtml(total[0]);

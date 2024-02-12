@@ -4,7 +4,7 @@ import { useState, useEffect, forwardRef } from 'react';
 
 import ReactDOM from 'react-dom';
 
-import css from 'app/_components/dirary/slate-components.module.css';
+import css from 'components/dirary/slate-components.module.css';
 import clsx from 'clsx';
 
 export const Button = forwardRef(({ className, active, reversed, ...props }, ref) => (

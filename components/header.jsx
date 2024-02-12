@@ -5,7 +5,7 @@ import clsx from 'clsx';
 
 import GiteRoundedIcon from '@mui/icons-material/GiteRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import css from 'app/_components/header.module.css';
+import css from 'components/header.module.css';
 
 const Header = () => {
   const pathname = usePathname();

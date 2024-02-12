@@ -2,21 +2,30 @@
 
 import { useFormState, useFormStatus } from 'react-dom';
 
-import { authenticate } from 'app/_lib/action/user';
-import Button from 'app/_components/common/button';
+import { authenticate } from 'lib/action/user';
+import Button from 'components/common/button';
+import { useEffect } from 'react';
+// import { resourceLimits } from 'worker_threads';
 
-const LoginForm = ({ backward }) => {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
-  // email, password를 받는 로그인 Form
+const LoginForm = ({ backward, forward }) => {
+  const initialState = { success: null, error: null };
+  const [result, dispatch] = useFormState(authenticate, initialState);
+
+  useEffect(() => {
+    if (result.success) {
+      forward();
+    }
+  }, [result]);
+
   return (
     <div>
       <form action={dispatch}>
-        <input type="email" name="email" placeholder="email" />
+        <input type="text" name="tag" placeholder="tag" />
         <input type="password" name="password" placeholder="password" />
         <LoginButton />
       </form>
       <div aria-live="polite" aria-atomic="true">
-        {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
+        {result.error && <p className="text-sm text-red-500">{result.error}</p>}
       </div>
       <Button
         onClick={() => {

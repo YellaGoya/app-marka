@@ -1,22 +1,29 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { putOnWaitingList } from 'app/_lib/action/user';
-import { test } from 'app/_lib/action/user';
-import Button from 'app/_components/common/button';
+import { putOnWaitingList } from 'lib/action/user';
+import { test } from 'lib/action/user';
+import Button from 'components/common/button';
+import { useEffect } from 'react';
 
-const RegistForm = ({ backward }) => {
-  const initialState = { message: null, errors: {} };
-  const [state, dispatch] = useFormState(putOnWaitingList, initialState);
+const RegistForm = ({ backward, forward }) => {
+  const initialState = { success: null, message: null, errors: {} };
+  const [result, dispatch] = useFormState(putOnWaitingList, initialState);
+
+  useEffect(() => {
+    if (result.success) {
+      forward();
+    }
+  }, [result]);
 
   return (
     <div>
       <form action={dispatch}>
         <label>
-          닉네임:
-          <input type="text" name="nickname" />
-          <div id="nickname-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.nickname && state.errors.nickname.map((error) => <p key={error}>{error}</p>)}
+          태그:
+          <input type="text" name="tag" />
+          <div id="tag-error" aria-live="polite" aria-atomic="true">
+            {result.errors?.tag && result.errors.tag.map((error) => <p key={error}>{error}</p>)}
           </div>
         </label>
 
@@ -24,7 +31,7 @@ const RegistForm = ({ backward }) => {
           이메일:
           <input type="email" name="email" />
           <div id="email-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.email && state.errors.email.map((error) => <p key={error}>{error}</p>)}
+            {result.errors?.email && result.errors.email.map((error) => <p key={error}>{error}</p>)}
           </div>
         </label>
 
@@ -32,7 +39,7 @@ const RegistForm = ({ backward }) => {
           비밀번호:
           <input type="password" name="password" />
           <div id="password-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.password && state.errors.password.map((error) => <p key={error}>{error}</p>)}
+            {result.errors?.password && result.errors.password.map((error) => <p key={error}>{error}</p>)}
           </div>
         </label>
 
@@ -40,7 +47,7 @@ const RegistForm = ({ backward }) => {
           비밀번호 확인:
           <input type="password" name="confirmPassword" />
           <div id="confirmPassword-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.confirmPassword && state.errors.confirmPassword.map((error) => <p key={error}>{error}</p>)}
+            {result.errors?.confirmPassword && result.errors.confirmPassword.map((error) => <p key={error}>{error}</p>)}
           </div>
         </label>
 

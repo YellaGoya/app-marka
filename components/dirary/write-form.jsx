@@ -2,22 +2,26 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
+import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
 
-import { getServerTime } from 'app/_lib/action/time';
-import { diariesState, onEditDiaryIdState } from 'app/_lib/recoil';
-import indexedDb from 'app/_lib/indexed-db';
+import { getServerTime } from 'lib/action/time';
+import { diariesState, onEditDiaryIdState } from 'lib/recoil';
+import * as clientDB from 'lib/indexed-db';
+import * as serverDB from 'lib/api/diary';
 
-import SlateEditor from 'app/_components/dirary/slate-editor';
-import TodoList from 'app/_components/dirary/todo-list';
-import Button from 'app/_components/common/button';
+import SlateEditor from 'components/dirary/slate-editor';
+import TodoList from 'components/dirary/todo-list';
+import Button from 'components/common/button';
 
 import LowPriorityRoundedIcon from '@mui/icons-material/LowPriorityRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
-import css from 'app/_components/dirary/write-form.module.css';
+import css from 'components/dirary/write-form.module.css';
 import global from 'app/globals.module.css';
 
 const WriteForm = ({ diaryId, idx }) => {
+  const { status } = useSession();
+
   const onEdit = Boolean(diaryId);
 
   const editorRef = useRef();
@@ -27,33 +31,34 @@ const WriteForm = ({ diaryId, idx }) => {
 
   const [diaryTitle, setDiaryTitle] = useState('');
   const [todoList, setTodoList] = useState({ extracted: [], manual: [] });
+  const [isSecret, setIsSecret] = useState(false);
   const [slateIsEmpty, setSlateIsEmpty] = useState(!onEdit);
   const [diary, setDiary] = useState(null);
 
   const setDiaries = useSetRecoilState(diariesState);
   const setOnEditDiaryID = useSetRecoilState(onEditDiaryIdState);
 
-  const { addDiary, readDiary, readDiaries, updateDiary } = indexedDb('Diaries');
-
   useEffect(() => {
+    let time;
     getServerTime()
       .then((result) => {
-        const serverTime = new Date(result);
-        const year = serverTime.getFullYear();
-        const month = serverTime.getMonth() + 1;
-        const day = serverTime.getDate();
+        time = new Date(result);
+      })
+      .catch(() => {
+        time = new Date();
+      })
+      .finally(() => {
+        const year = time.getFullYear();
+        const month = time.getMonth() + 1;
+        const day = time.getDate();
         const dateString = `${year}. ${month}. ${day}.`;
 
         setTimeNow(dateString);
-      })
-      .catch(() => {
-        setOnEditDiaryID(null);
       });
 
     if (onEdit) {
-      readDiary(diaryId).then((diary) => {
+      clientDB.readDiary(diaryId).then((diary) => {
         setDiary(diary);
-
         setDiaryTitle(diary.title);
         setTodoList({ extracted: new Map(diary.extracted_todos), manual: new Map(diary.manual_todos) });
 
@@ -68,58 +73,81 @@ const WriteForm = ({ diaryId, idx }) => {
     editorRef.current.extractTodoList(setTodoList);
   };
 
-  const saveDiary = () => {
+  const saveDiary = async () => {
     const contentHtml = editorRef.current.extractDiary();
+    const extracted = Array.from(todoList.extracted.entries());
+    const manual = Array.from(todoList.manual.entries());
 
-    if (onEdit) {
-      const extracted = Array.from(todoList.extracted.entries());
-      const manual = Array.from(todoList.manual.entries());
+    let time;
+    let timestamp;
 
-      updateDiary({
-        diary_id: diary.diary_id,
-        title: diaryTitle ? diaryTitle : timeNow,
-        content_html: contentHtml,
-        extracted_todos: extracted,
-        manual_todos: manual,
-        created_at: diary.created_at,
-      }).then(() => {
-        setOnEditDiaryID(null);
+    try {
+      time = await getServerTime();
+      timestamp = new Date(time).getTime();
+    } catch (error) {
+      console.error('Failed to fetch server time:', error);
 
-        setDiaries((prevDiaries) => {
-          const updatedDiaries = [...prevDiaries];
+      const date = new Date();
 
-          updatedDiaries[idx] = {
-            ...diary,
-            title: diaryTitle ? diaryTitle : timeNow,
-            content_html: contentHtml,
-            extracted_todos: extracted,
-            manual_todos: manual,
-          };
-
-          return updatedDiaries;
-        });
-      });
-    } else {
-      addDiary({
-        title: diaryTitle ? diaryTitle : timeNow,
-        content_html: contentHtml,
-        extracted_todos: Array.from(todoList.extracted.entries()),
-        manual_todos: Array.from(todoList.manual.entries()),
-        is_secret: false,
-      }).then(() => {
-        setDiaryTitle('');
-        editorRef.current.emptyDiary();
-        setTodoList({ extracted: [], manual: [] });
-        updateMyDiaries();
-      });
+      time = date.toISOString();
+      timestamp = date.getTime();
     }
 
-    // updateDiary({ id: 1, title: 'test2', content: 'helloworld!2');
+    const newDiary = {
+      diary_id: onEdit ? diary.diary_id : timestamp,
+      title: diaryTitle ? diaryTitle : timeNow,
+      content_html: contentHtml,
+      extracted_todos: extracted,
+      manual_todos: manual,
+      created_at: onEdit ? diary.created_at : time,
+      updated_at: time,
+      is_secret: isSecret,
+    };
+
+    const onUpdateDiary = () => {
+      setOnEditDiaryID(null);
+
+      setDiaries((prevDiaries) => {
+        const updatedDiaries = [...prevDiaries];
+        updatedDiaries[idx] = {
+          ...diary,
+          title: diaryTitle ? diaryTitle : timeNow,
+          content_html: contentHtml,
+          extracted_todos: extracted,
+          manual_todos: manual,
+        };
+
+        return updatedDiaries;
+      });
+    };
+
+    const onAddDiary = () => {
+      setDiaryTitle('');
+      setTodoList({ extracted: [], manual: [] });
+
+      editorRef.current.emptyDiary();
+      updateMyDiaries();
+    };
+
+    const action = onEdit ? 'updateDiary' : 'addDiary';
+    const handler = onEdit ? onUpdateDiary : onAddDiary;
+
+    try {
+      clientDB[action](newDiary);
+
+      if (status === 'authenticated') {
+        serverDB[action](newDiary);
+      }
+
+      handler();
+    } catch (error) {
+      console.error('Failed to save diary :', error);
+    }
   };
 
   const updateMyDiaries = async () => {
     try {
-      const diaries = await readDiaries(false);
+      const diaries = status === 'authenticated' ? await serverDB.readDiaries(false) : await clientDB.readDiaries(false);
       setDiaries(diaries);
     } catch {
       return new Error('Error: getMyDiaries.');
