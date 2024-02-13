@@ -57,17 +57,28 @@ const WriteForm = ({ diaryId, idx }) => {
       });
 
     if (onEdit) {
-      clientDB.readDiary(diaryId).then((diary) => {
-        setDiary(diary);
-        setDiaryTitle(diary.title);
-        setTodoList({ extracted: new Map(diary.extracted_todos), manual: new Map(diary.manual_todos) });
-
-        setIsLoaded(true);
-      });
+      loadDiary();
     } else {
       setIsLoaded(true);
     }
   }, []);
+
+  const loadDiary = async () => {
+    try {
+      const prevDiary = status === 'authenticated' ? await serverDB.readDiary(diaryId) : await clientDB.readDiary(diaryId);
+
+      setDiary(prevDiary);
+      setDiaryTitle(prevDiary.title);
+      setTodoList({
+        extracted: new Map(prevDiary.extracted_todos),
+        manual: new Map(prevDiary.manual_todos),
+      });
+
+      setIsLoaded(true);
+    } catch (error) {
+      console.error(`Failed to fetch diary: ${error}`);
+    }
+  };
 
   const extractTodoList = () => {
     editorRef.current.extractTodoList(setTodoList);
@@ -141,7 +152,7 @@ const WriteForm = ({ diaryId, idx }) => {
 
       handler();
     } catch (error) {
-      console.error('Failed to save diary :', error);
+      console.error(`Failed to save diary: ${error}`);
     }
   };
 

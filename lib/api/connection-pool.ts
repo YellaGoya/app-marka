@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+'use server';
+
 import { Pool } from 'pg';
 
 const pool = new Pool({
@@ -8,13 +10,13 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-const useSQL = async <T>(query: any): Promise<T[]> => {
+const useSQL = async (query: any): Promise<any> => {
   const conn = await pool.connect();
 
   try {
     const data = await query(conn);
 
-    return data?.rows;
+    return data;
   } catch (error) {
     console.error('Database Error:', error);
 

@@ -42,31 +42,31 @@ const MyDiaries = () => {
   );
 
   const getMyDiaries = async (isLazyLoading = true) => {
-    console.log('getMyDiaries', status, isLazyLoading);
     if (status === 'loading') return;
 
     try {
-      const newDiaries = status === 'authenticated' ? await serverDB.readDiaries(isLazyLoading) : await clientDB.readDiaries(isLazyLoading);
+      const readDiaries = status === 'authenticated' ? serverDB.readDiaries : clientDB.readDiaries;
+      const newDiaries = await readDiaries(isLazyLoading);
 
-      if (isLazyLoading)
-        setDiaries((prevDiaries) => {
-          return [...prevDiaries, ...newDiaries];
-        });
-      else setDiaries(newDiaries);
-    } catch {
-      return new Error('Error: getMyDiaries.');
+      setDiaries((prevDiaries) => (isLazyLoading ? [...prevDiaries, ...newDiaries] : newDiaries));
+    } catch (error) {
+      throw new Error(`Error getting diaries: ${error}`);
     }
   };
 
-  const removeDiaryHandler = (diaryId, idx) => {
-    clientDB.removeDiary(diaryId).then(() => {
-      setDiaries((prevDiaries) => {
-        const removedDiaries = [...prevDiaries];
-        removedDiaries.splice(idx, 1);
+  const removeDiaryHandler = async (diaryId, idx) => {
+    try {
+      if (status === 'authenticated') diaryId = parseDiaryId(diaryId);
 
-        return removedDiaries;
-      });
-    });
+      await clientDB.removeDiary(diaryId, status === 'authenticated');
+      setDiaries((prevDiaries) => prevDiaries.filter((_, index) => index !== idx));
+    } catch (error) {
+      console.error(`Failed to remove diary: ${error}`);
+    }
+  };
+
+  const parseDiaryId = (diaryId) => {
+    return Number(diaryId.slice(-13));
   };
 
   return (

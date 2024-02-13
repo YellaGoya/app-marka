@@ -18,10 +18,10 @@ export const {
       async authorize({ tag, password }: any) {
         const user = await getUser(tag);
 
-        if (user.length === 0) return null;
-        const passwordsMatch = await bcrypt.compare(password, user[0].password);
+        if (!user) return null;
+        const passwordsMatch = await bcrypt.compare(password, user.password);
 
-        if (passwordsMatch) return user[0] as any;
+        if (passwordsMatch) return user as any;
       },
     }),
   ],

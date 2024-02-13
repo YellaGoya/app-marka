@@ -5,41 +5,42 @@ import useSQL from 'lib/api/connection-pool';
 import { User } from 'lib/type-def';
 import { PoolClient } from 'pg';
 
-type Exists = { exists: boolean };
-
-const getUser = async (tag: string): Promise<User[]> => {
-  return useSQL<User>((conn: PoolClient) => {
+const getUser = async (tag: string): Promise<User> => {
+  const { rows } = await useSQL((conn: PoolClient) => {
     return conn.query('SELECT user_id, tag, email, password FROM users WHERE tag = $1', [tag]);
   });
+
+  return rows[0];
 };
 
 const checkUserByTag = async (tag: string): Promise<boolean> => {
-  const result = await useSQL<Exists>((conn: PoolClient) => {
+  const { rows } = await useSQL((conn: PoolClient) => {
     return conn.query('SELECT EXISTS (SELECT 1 FROM users WHERE tag = $1 UNION SELECT 1 FROM waiting WHERE tag = $1)', [tag]);
   });
 
-  return result[0].exists;
+  return rows[0].exists;
 };
 
 const checkUserByEmail = async (email: string): Promise<boolean> => {
-  const result = await useSQL<Exists>((conn: PoolClient) => {
+  const { rows } = await useSQL((conn: PoolClient) => {
     return conn.query('SELECT EXISTS (SELECT 1 FROM users WHERE email = $1 UNION SELECT 1 FROM waiting WHERE email = $1)', [email]);
   });
 
-  return result[0].exists;
+  return rows[0].exists;
 };
 
 const getWaitingList = async (): Promise<User[]> => {
-  const result = await useSQL<User>((conn: PoolClient) => {
+  const { rows } = await useSQL((conn: PoolClient) => {
     return conn.query('SELECT list_id, tag, email, listed_at FROM waiting');
   });
 
-  return result;
+  return rows;
 };
 
 const approveUser = async (list_id: number): Promise<any> => {
-  const result = await useSQL(async (conn: PoolClient) => {
+  const { rows } = await useSQL(async (conn: PoolClient) => {
     try {
+      await conn.query('BEGIN');
       // waiting 테이블에서 승인할 사용자의 정보를 가져온다.
       const { rows } = await conn.query('SELECT * FROM waiting WHERE list_id = $1', [list_id]);
       const user = rows[0];
@@ -64,7 +65,7 @@ const approveUser = async (list_id: number): Promise<any> => {
     }
   });
 
-  return result;
+  return rows;
 };
 
 export { getUser, checkUserByTag, checkUserByEmail, getWaitingList, approveUser };

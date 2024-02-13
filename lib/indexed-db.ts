@@ -2,6 +2,7 @@
 import { openDB, IDBPDatabase } from 'idb';
 import { getServerTime } from 'lib/action/time';
 import { DiaryClient } from 'lib/type-def';
+import * as serverDB from 'lib/api/diary';
 
 // 싱글턴 인스턴스를 저장할 변수를 정의합니다.
 let dbInstance: IDBPDatabase | null = null;
@@ -30,9 +31,17 @@ const useTransaction = async (transaction: any, mode: IDBTransactionMode) => {
 
   const tx = dbInstance.transaction('Diaries', mode);
   const store = tx.objectStore('Diaries');
-  const result = await transaction(store);
-  await tx.done;
 
+  let result;
+  try {
+    result = await transaction(store);
+  } catch (error) {
+    tx.abort();
+
+    throw error;
+  }
+
+  await tx.done;
   return result;
 };
 
@@ -74,15 +83,17 @@ const updateStatus = async (place: 'extracted' | 'manual', diaryId: string, todo
   }, 'readwrite');
 };
 
-const removeDiary = async (diary_id: number): Promise<void> => {
-  useTransaction(async (store: any) => {
+const removeDiary = async (diary_id: number, isSync: boolean = false): Promise<void> => {
+  return useTransaction(async (store: any) => {
     await store.delete(diary_id);
+
+    if (isSync) await serverDB.removeDiary(diary_id);
   }, 'readwrite');
 };
 
-const readDiary = async (id: number): Promise<DiaryClient | undefined> => {
+const readDiary = async (diary_id: number): Promise<DiaryClient | undefined> => {
   return useTransaction(async (store: any) => {
-    return store.get(id);
+    return store.get(diary_id);
   }, 'readwrite');
 };
 
