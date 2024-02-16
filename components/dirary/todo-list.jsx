@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
 
-import { updateStatus } from 'lib/indexed-db';
+import * as clientDB from 'lib/indexed-db';
+import * as serverDB from 'lib/api/diary';
 import Button from 'components/common/button';
 
 import JoinFullOutlinedIcon from '@mui/icons-material/JoinFullOutlined';
@@ -44,7 +46,7 @@ const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
     });
 
     setKeyNumber((prevKey) => prevKey + 1);
-  }, []);
+  }, [keyNumber]);
 
   return (
     <div
@@ -88,6 +90,8 @@ const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
 };
 
 const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) => {
+  const { status } = useSession();
+
   if (!todo) return;
   const [isDeleted, setIsDeleted] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -141,14 +145,17 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
 
   /** 투두리스트 done, undone 상태 토글 처리 */
   const updateTodoStatus = async (todoId, done) => {
-    let apiResult = true;
+    try {
+      if (!isWrite) {
+        if (status === 'authenticated') {
+          diaryId = Number(diaryId.slice(-13));
 
-    if (!isWrite)
-      await updateStatus(place, diaryId, todoId, done).catch(() => {
-        apiResult = false;
-      });
+          await serverDB.updateStatus(place, diaryId, todoId, done);
+        }
 
-    if (apiResult) {
+        await clientDB.updateStatus(place, diaryId, todoId, done);
+      }
+
       setTodoList((prevTodoList) => {
         const list = new Map(prevTodoList[place]);
 
@@ -162,6 +169,8 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
           [place]: list,
         };
       });
+    } catch {
+      // DB가 수정되지 않으면 아무런 변화가 없도록
     }
   };
 

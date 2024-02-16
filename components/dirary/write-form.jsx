@@ -30,7 +30,8 @@ const WriteForm = ({ diaryId, idx }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [diaryTitle, setDiaryTitle] = useState('');
-  const [todoList, setTodoList] = useState({ extracted: [], manual: [] });
+  const [todoList, setTodoList] = useState({ extracted: new Map(), manual: new Map() });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSecret, setIsSecret] = useState(false);
   const [slateIsEmpty, setSlateIsEmpty] = useState(!onEdit);
   const [diary, setDiary] = useState(null);
@@ -40,6 +41,7 @@ const WriteForm = ({ diaryId, idx }) => {
 
   useEffect(() => {
     let time;
+
     getServerTime()
       .then((result) => {
         time = new Date(result);
@@ -67,12 +69,11 @@ const WriteForm = ({ diaryId, idx }) => {
     try {
       const prevDiary = status === 'authenticated' ? await serverDB.readDiary(diaryId) : await clientDB.readDiary(diaryId);
 
+      const { title, extracted_todos, manual_todos } = prevDiary;
+
       setDiary(prevDiary);
-      setDiaryTitle(prevDiary.title);
-      setTodoList({
-        extracted: new Map(prevDiary.extracted_todos),
-        manual: new Map(prevDiary.manual_todos),
-      });
+      setDiaryTitle(title);
+      setTodoList({ extracted: new Map(extracted_todos), manual: new Map(manual_todos) });
 
       setIsLoaded(true);
     } catch (error) {
@@ -96,8 +97,6 @@ const WriteForm = ({ diaryId, idx }) => {
       time = await getServerTime();
       timestamp = new Date(time).getTime();
     } catch (error) {
-      console.error('Failed to fetch server time:', error);
-
       const date = new Date();
 
       time = date.toISOString();
@@ -132,46 +131,47 @@ const WriteForm = ({ diaryId, idx }) => {
       });
     };
 
-    const onAddDiary = () => {
+    const onAddDiary = async () => {
       setDiaryTitle('');
       setTodoList({ extracted: [], manual: [] });
 
       editorRef.current.emptyDiary();
-      updateMyDiaries();
+
+      try {
+        const diaries = status === 'authenticated' ? await serverDB.readDiaries(false) : await clientDB.readDiaries(false);
+
+        setDiaries(diaries);
+      } catch (error) {
+        location.reload();
+      }
     };
 
     const action = onEdit ? 'updateDiary' : 'addDiary';
     const handler = onEdit ? onUpdateDiary : onAddDiary;
 
-    try {
-      clientDB[action](newDiary);
+    if (onEdit && status === 'authenticated') newDiary.diary_id = Number(newDiary.diary_id.slice(-13));
 
-      if (status === 'authenticated') {
-        serverDB[action](newDiary);
-      }
+    try {
+      if (status === 'authenticated') await serverDB[action](newDiary);
+      console.log('tetet');
+      await clientDB[action](newDiary);
 
       handler();
     } catch (error) {
-      console.error(`Failed to save diary: ${error}`);
-    }
-  };
-
-  const updateMyDiaries = async () => {
-    try {
-      const diaries = status === 'authenticated' ? await serverDB.readDiaries(false) : await clientDB.readDiaries(false);
-      setDiaries(diaries);
-    } catch {
-      return new Error('Error: getMyDiaries.');
+      console.error(error.message);
     }
   };
 
   /** 제목 input 영역 클릭시 가장 끝으로 focus 이동 */
   const inputClickHandler = (event) => {
-    setTimeout(() => {
-      event.target.setSelectionRange(event.target.value.length, event.target.value.length);
-    }, 0);
+    const input = event.target;
 
-    event.target.scrollLeft = event.target.scrollWidth;
+    setTimeout(() => {
+      const { length } = input.value;
+
+      input.setSelectionRange(length, length);
+      input.scrollLeft = input.scrollWidth;
+    }, 0);
   };
 
   /** 제목 input 영역의 enter 키 submit 이벤트 차단 */
@@ -179,8 +179,10 @@ const WriteForm = ({ diaryId, idx }) => {
     if (event.key === 'Enter') {
       event.preventDefault();
 
-      if (event.target.value === '' && timeNow) {
-        event.target.value = timeNow;
+      const input = event.target;
+
+      if (input.value === '' && timeNow) {
+        input.value = timeNow;
       }
     }
   };

@@ -17,10 +17,6 @@ const useSQL = async (query: any): Promise<any> => {
     const data = await query(conn);
 
     return data;
-  } catch (error) {
-    console.error('Database Error:', error);
-
-    throw error;
   } finally {
     conn.release();
   }

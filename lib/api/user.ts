@@ -4,6 +4,7 @@
 import useSQL from 'lib/api/connection-pool';
 import { User } from 'lib/type-def';
 import { PoolClient } from 'pg';
+import { auth } from 'lib/auth';
 
 const getUser = async (tag: string): Promise<User> => {
   const { rows } = await useSQL((conn: PoolClient) => {
@@ -38,6 +39,9 @@ const getWaitingList = async (): Promise<User[]> => {
 };
 
 const approveUser = async (list_id: number): Promise<any> => {
+  const session = await auth();
+  if (!session?.user) throw new Error('Authorization error: Unauthorized User.');
+
   const { rows } = await useSQL(async (conn: PoolClient) => {
     try {
       await conn.query('BEGIN');
@@ -59,7 +63,6 @@ const approveUser = async (list_id: number): Promise<any> => {
       await conn.query('COMMIT');
     } catch (error) {
       await conn.query('ROLLBACK');
-      console.error('approveUser Transaction Error:', error);
 
       throw new Error('Failed to approve user.');
     }

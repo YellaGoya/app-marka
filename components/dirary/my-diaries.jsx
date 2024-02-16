@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState, memo } from 'react';
 import { useRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
 
@@ -21,9 +21,10 @@ const MyDiaries = () => {
   const { status } = useSession();
 
   const [diaries, setDiaries] = useRecoilState(diariesState);
+  const [onEditDiaryID, setOnEditDiaryID] = useRecoilState(onEditDiaryIdState);
 
   useEffect(() => {
-    if (status !== 'loading') getMyDiaries(false);
+    if (status !== 'loading') getMyDiaries({ isLazy: false });
   }, [status]);
 
   const observer = useRef();
@@ -33,7 +34,7 @@ const MyDiaries = () => {
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
-          getMyDiaries();
+          getMyDiaries({ isLazy: true });
         }
       });
       if (node) observer.current.observe(node);
@@ -41,33 +42,31 @@ const MyDiaries = () => {
     [status],
   );
 
-  const getMyDiaries = async (isLazyLoading = true) => {
+  const getMyDiaries = async ({ isLazy }) => {
     if (status === 'loading') return;
 
     try {
-      const readDiaries = status === 'authenticated' ? serverDB.readDiaries : clientDB.readDiaries;
-      const newDiaries = await readDiaries(isLazyLoading);
+      const newDiaries = status === 'authenticated' ? await serverDB.readDiaries(isLazy) : await clientDB.readDiaries(isLazy);
 
-      setDiaries((prevDiaries) => (isLazyLoading ? [...prevDiaries, ...newDiaries] : newDiaries));
-    } catch (error) {
-      throw new Error(`Error getting diaries: ${error}`);
-    }
+      setDiaries((prevDiaries) => (isLazy ? [...prevDiaries, ...newDiaries] : newDiaries));
+    } catch {}
   };
 
-  const removeDiaryHandler = async (diaryId, idx) => {
-    try {
-      if (status === 'authenticated') diaryId = parseDiaryId(diaryId);
+  const removeDiary = useCallback(
+    async (diaryId, idx) => {
+      if (status === 'authenticated') diaryId = Number(diaryId.slice(-13));
 
-      await clientDB.removeDiary(diaryId, status === 'authenticated');
-      setDiaries((prevDiaries) => prevDiaries.filter((_, index) => index !== idx));
-    } catch (error) {
-      console.error(`Failed to remove diary: ${error}`);
-    }
-  };
+      try {
+        if (status === 'authenticated') await serverDB.removeDiary(diaryId);
+        await clientDB.removeDiary(diaryId);
 
-  const parseDiaryId = (diaryId) => {
-    return Number(diaryId.slice(-13));
-  };
+        setDiaries((prevDiaries) => prevDiaries.filter((_, index) => index !== idx));
+      } catch (error) {
+        console.error(`Failed to remove diary: ${error}`);
+      }
+    },
+    [status],
+  );
 
   return (
     <div className={css.diariesContainer}>
@@ -79,7 +78,9 @@ const MyDiaries = () => {
               lastDiaryRef={diaries.length - 1 === idx ? lastDiaryRef : null}
               diary={diary}
               idx={idx}
-              removeDiary={removeDiaryHandler}
+              removeDiary={removeDiary}
+              setOnEditDiaryID={setOnEditDiaryID}
+              onEditDiaryID={onEditDiaryID}
             />
           );
         })}
@@ -87,9 +88,11 @@ const MyDiaries = () => {
   );
 };
 
-const Diary = ({ diary, idx, lastDiaryRef, removeDiary }) => {
-  const [onEditDiaryID, setOnEditDiaryID] = useRecoilState(onEditDiaryIdState);
+const onEditing = (prevProps, nextProps) => {
+  return prevProps.onEditDiaryID !== nextProps.diary.diary_id && nextProps.onEditDiaryID !== nextProps.diary.diary_id;
+};
 
+const Diary = memo(({ diary, idx, lastDiaryRef, removeDiary, onEditDiaryID, setOnEditDiaryID }) => {
   const diaryRef = useRef(null);
 
   useEffect(() => {
@@ -102,7 +105,7 @@ const Diary = ({ diary, idx, lastDiaryRef, removeDiary }) => {
         {onEditDiaryID === diary.diary_id ? (
           <WriteForm diaryId={diary.diary_id} idx={idx} />
         ) : (
-          <div ref={lastDiaryRef ? lastDiaryRef : null}>
+          <div ref={lastDiaryRef}>
             <span className={css.diaryTitle}>
               {diary.title}
               <div className={css.diaryButtonContainer}>
@@ -132,6 +135,6 @@ const Diary = ({ diary, idx, lastDiaryRef, removeDiary }) => {
       </article>
     </>
   );
-};
+}, onEditing);
 
 export default MyDiaries;

@@ -18,20 +18,9 @@ export type Waiting = {
 type Todo = { done: boolean; text: string };
 type TodoList = [string, Todo];
 
-export type DiaryClient = {
-  diary_id?: number | string;
-  title: string;
-  content_html: string;
-  created_at?: string;
-  updated_at?: string;
-  extracted_todos: Array<TodoList>;
-  manual_todos: Array<TodoList>;
-  is_secret: boolean;
-};
-
-export type DiaryServer = {
-  diary_id?: string;
+export type Diary = {
   user_id?: number;
+  diary_id?: number;
   title: string;
   content_html: string;
   created_at?: string;

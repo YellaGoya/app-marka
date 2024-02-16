@@ -269,7 +269,8 @@ const toggleMark = async (editor, format) => {
     Editor.addMark(editor, format, true);
   }
 
-  Transforms.deselect(editor);
+  Transforms.collapse(editor, { edge: 'end' });
+  Transforms.move(editor, { distance: 1, unit: 'offset' });
 };
 
 const isMarkActive = (editor, format) => {
