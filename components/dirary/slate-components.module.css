@@ -6,16 +6,20 @@
   transition: color 0.2s ease;
 }
 
-.black {
-  color: black;
+.aaa {
+  color: #bbb;
 }
 
-.aaa {
+.aaa:hover {
+  color: #fff;
+}
+
+.bbb {
   color: #555;
 }
 
-.ccc {
-  color: #ccc;
+.bbb:hover {
+  color: #000;
 }
 
 .icon {
@@ -26,15 +30,15 @@
 .menu {
   display: flex;
   align-items: center;
-  margin-top: -8px;
-  padding: 1px 4px;
+  margin-top: -5px;
+  padding: 1px 4px 2px 4px;
 
   position: absolute;
   top: -10000px;
   left: -10000px;
 
   opacity: 0;
-  background-color: #0002;
+  background-color: rgba(128, 128, 128, 0.35);
   border-radius: 12px;
 
   backdrop-filter: blur(5px);

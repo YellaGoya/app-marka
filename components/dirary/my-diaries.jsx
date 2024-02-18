@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useCallback, useState, memo } from 'react';
+import { useEffect, useState, useRef, useCallback, memo } from 'react';
 import { useRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
+import clsx from 'clsx';
 
 import * as clientDB from 'lib/indexed-db';
 import * as serverDB from 'lib/api/diary';
@@ -94,46 +95,53 @@ const onEditing = (prevProps, nextProps) => {
 
 const Diary = memo(({ diary, idx, lastDiaryRef, removeDiary, onEditDiaryID, setOnEditDiaryID }) => {
   const diaryRef = useRef(null);
+  const readRef = useRef(null);
+  const [minHeight, setMinHeight] = useState(0);
 
   useEffect(() => {
-    diaryRef.current.style.minHeight = `${diaryRef.current.getBoundingClientRect().height}px`;
+    setMinHeight(diaryRef.current.clientHeight);
+    setContainerMinHeight(`${diaryRef.current.clientHeight}px`);
+    if (readRef.current) readRef.current.style.position = 'absolute';
   }, [diaryRef]);
 
+  useEffect(() => {
+    if (onEditDiaryID !== diary.diary_id && minHeight) {
+      setContainerMinHeight(`${minHeight}px`);
+    }
+  }, [onEditDiaryID]);
+
+  const setContainerMinHeight = (value) => {
+    diaryRef.current.style.minHeight = value;
+  };
+
   return (
-    <>
-      <article ref={diaryRef} className={css.diaryContainer}>
-        {onEditDiaryID === diary.diary_id ? (
-          <WriteForm diaryId={diary.diary_id} idx={idx} />
-        ) : (
-          <div ref={lastDiaryRef}>
-            <span className={css.diaryTitle}>
-              {diary.title}
-              <div className={css.diaryButtonContainer}>
-                <Button
-                  onClick={() => {
-                    setOnEditDiaryID(diary.diary_id);
-                  }}
-                >
-                  <EditRoundedIcon />
-                </Button>
-                <Button
-                  onClick={() => {
-                    removeDiary(diary.diary_id, idx);
-                  }}
-                >
-                  <DeleteRoundedIcon />
-                </Button>
-              </div>
-              <div style={{ width: '1px', height: '1px' }} />
-            </span>
-            <div dangerouslySetInnerHTML={{ __html: diary.content_html }} className={css.diaryCotentContainer} />
-            <div>
-              <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} diaryId={diary.diary_id} />
-            </div>
+    <article ref={diaryRef} className={css.diaryContainer}>
+      <div ref={lastDiaryRef || readRef} className={clsx(css.diaryRead, { [css.diaryHidden]: onEditDiaryID === diary.diary_id })}>
+        <span className={css.diaryTitle}>
+          {diary.title}
+          <div className={css.diaryButtonContainer}>
+            <Button
+              onClick={() => {
+                setOnEditDiaryID(diary.diary_id);
+              }}
+            >
+              <EditRoundedIcon />
+            </Button>
+            <Button
+              onClick={() => {
+                removeDiary(diary.diary_id, idx);
+              }}
+            >
+              <DeleteRoundedIcon />
+            </Button>
           </div>
-        )}
-      </article>
-    </>
+          <div style={{ width: '1px', height: '1px' }} />
+        </span>
+        <div dangerouslySetInnerHTML={{ __html: diary.content_html }} className={css.diaryCotentContainer} />
+        <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} diaryId={diary.diary_id} />
+      </div>
+      {onEditDiaryID === diary.diary_id && <WriteForm diaryId={diary.diary_id} idx={idx} setContainerMinHeight={setContainerMinHeight} />}
+    </article>
   );
 }, onEditing);
 

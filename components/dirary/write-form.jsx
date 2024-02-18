@@ -14,16 +14,18 @@ import SlateEditor from 'components/dirary/slate-editor';
 import TodoList from 'components/dirary/todo-list';
 import Button from 'components/common/button';
 
+import EditOffRoundedIcon from '@mui/icons-material/EditOffRounded';
 import LowPriorityRoundedIcon from '@mui/icons-material/LowPriorityRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import css from 'components/dirary/write-form.module.css';
 import global from 'app/globals.module.css';
 
-const WriteForm = ({ diaryId, idx }) => {
+const WriteForm = ({ diaryId, idx, setContainerMinHeight }) => {
   const { status } = useSession();
 
   const onEdit = Boolean(diaryId);
 
+  const formRef = useRef();
   const editorRef = useRef();
 
   const [timeNow, setTimeNow] = useState(null);
@@ -64,6 +66,12 @@ const WriteForm = ({ diaryId, idx }) => {
       setIsLoaded(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (isLoaded && onEdit) {
+      setContainerMinHeight(`${formRef.current.clientHeight + 61}px`);
+    }
+  }, [isLoaded]);
 
   const loadDiary = async () => {
     try {
@@ -115,8 +123,6 @@ const WriteForm = ({ diaryId, idx }) => {
     };
 
     const onUpdateDiary = () => {
-      setOnEditDiaryID(null);
-
       setDiaries((prevDiaries) => {
         const updatedDiaries = [...prevDiaries];
         updatedDiaries[idx] = {
@@ -129,6 +135,8 @@ const WriteForm = ({ diaryId, idx }) => {
 
         return updatedDiaries;
       });
+
+      closeOnEdit();
     };
 
     const onAddDiary = async () => {
@@ -187,8 +195,12 @@ const WriteForm = ({ diaryId, idx }) => {
     }
   };
 
+  const closeOnEdit = () => {
+    setOnEditDiaryID(null);
+  };
+
   return (
-    <div className={clsx(css.newWriteContainer, { [css.editContainer]: onEdit }, { [css.loadedContainer]: isLoaded })}>
+    <div ref={formRef} className={clsx(css.newWriteContainer, { [css.editContainer]: onEdit }, { [css.loadedContainer]: isLoaded })}>
       <form className={css.form}>
         <input
           value={diaryTitle}
@@ -215,6 +227,11 @@ const WriteForm = ({ diaryId, idx }) => {
         <section className={css.bottom}>
           <TodoList todoList={todoList} setTodoList={setTodoList} onEdit={onEdit} />
           <fieldset className={css.buttonContainer}>
+            {onEdit && (
+              <Button className={css.cancelEditButton} onClick={closeOnEdit}>
+                <EditOffRoundedIcon />
+              </Button>
+            )}
             <Button disabled={slateIsEmpty} onClick={extractTodoList}>
               <LowPriorityRoundedIcon />
             </Button>

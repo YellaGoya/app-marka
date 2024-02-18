@@ -1,28 +1,48 @@
 .diariesContainer {
-  padding: 0 15px;
-
+  padding: 0 15px 150px 15px;
   margin: 0 auto;
 }
 
 .diaryContainer {
   position: relative;
-
   height: fit-content;
 
+  transition: min-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.diaryContainer:first-child {
+  margin-top: 15px;
+}
+
+.diaryContainer:not(:first-child) {
   margin-top: 60px;
 }
 
-.diaryContainer:not(:last-child):after {
+.diaryContainer:before {
   content: "";
   display: block;
-  margin-top: 60px;
 
+  margin-bottom: 60px;
   height: 1px;
   background-color: #e0e0e0;
 }
 
-.diaryContainer:last-child {
-  padding-bottom: 150px;
+.diaryContainer:first-child:before {
+  background-color: transparent;
+}
+
+.diaryRead {
+  visibility: visible;
+  opacity: 1;
+
+  transition:
+    visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.diaryHidden {
+  visibility: hidden;
+  opacity: 0;
 }
 
 .diaryTitle {

@@ -1,9 +1,7 @@
 .newWriteContainer {
   position: relative;
+  height: 0;
 
-  height: fit-content;
-
-  margin-bottom: 75px;
   padding: 15px;
 
   border-radius: 0.8rem;
@@ -21,6 +19,7 @@
 }
 
 .loadedContainer {
+  height: fit-content;
   opacity: 1;
 }
 
@@ -79,14 +78,30 @@
 }
 
 .buttonContainer > button:first-child > svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.buttonContainer > button:first-child {
+  margin-top: -1px;
+  margin-right: 30px;
+}
+
+.buttonContainer > button:nth-last-child(2) > svg {
   width: 1.7rem;
   height: 1.7rem;
-  margin-right: 10px;
+}
+
+.buttonContainer > button:nth-last-child(2) {
+  margin-top: 0;
+  margin-right: 8px;
 }
 
 .editContainer {
   width: calc(100% + 30px);
+
   margin-left: -15px;
+
   background-color: #333;
 }
 

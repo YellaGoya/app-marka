@@ -42,12 +42,6 @@ const SlateEditor = forwardRef((props, ref) => {
         },
       ]);
     }
-
-    document.addEventListener('selectionchange', browserSelectionChangeHandler);
-
-    return () => {
-      document.removeEventListener('selectionchange', browserSelectionChangeHandler);
-    };
   }, []);
 
   useEffect(() => {
@@ -74,7 +68,7 @@ const SlateEditor = forwardRef((props, ref) => {
     }
   };
 
-  const browserSelectionChangeHandler = () => {
+  const selectionChangeHandler = () => {
     if (document.activeElement.id !== 'slateEditor') return;
 
     const selection = window.getSelection();
@@ -93,12 +87,21 @@ const SlateEditor = forwardRef((props, ref) => {
 
       const newRule = `
       #${parentElement.id} *::selection {
-        background-color: #d7e5fc;
+        background-color: ${onEdit ? '#7ab8ff' : '#d7e5fc'};
       }
       `;
       styleElement.sheet.insertRule(newRule, 0);
 
       isSelected.current = true;
+    }
+  };
+
+  const blurHandler = () => {
+    if (isSelected.current) {
+      const styleElement = document.getElementById('selectedEditor');
+      document.head.removeChild(styleElement);
+
+      isSelected.current = false;
     }
   };
 
@@ -237,22 +240,22 @@ const SlateEditor = forwardRef((props, ref) => {
       initialValue={initialValue}
       onChange={() => {
         checkEmpty();
+        selectionChangeHandler();
       }}
     >
-      <HoveringToolbar />
+      <HoveringToolbar onEdit={onEdit} />
       <Editable
         id="slateEditor"
         className={clsx(css.slateEditor, { [css.editEditor]: onEdit })}
         renderLeaf={(props) => <Leaf {...props} />}
         placeholder="내용..."
         readOnly={!isMounted}
-        onDoubleClick={() => {
-          dblClickHandler();
-        }}
+        onDoubleClick={dblClickHandler}
         onKeyDown={(event) => {
           // if (!event.nativeEvent.isComposing) checkEmpty();
           keyDownHandler(event);
         }}
+        onBlur={blurHandler}
       />
     </Slate>
   ) : (
@@ -260,24 +263,26 @@ const SlateEditor = forwardRef((props, ref) => {
   );
 });
 
-const toggleMark = async (editor, format) => {
-  const isActive = isMarkActive(editor, format);
+const toggleMark = async (editor) => {
+  const isActive = isMarkActive(editor);
 
   if (isActive) {
-    Editor.removeMark(editor, format);
+    Editor.removeMark(editor, 'code');
   } else {
-    Editor.addMark(editor, format, true);
+    Editor.addMark(editor, 'code', true);
   }
 
   Transforms.collapse(editor, { edge: 'end' });
   Transforms.move(editor, { distance: 1, unit: 'offset' });
 };
 
-const isMarkActive = (editor, format) => {
+const isMarkActive = (editor) => {
   try {
     const marks = Editor.marks(editor);
-    return marks ? marks[format] === true : false;
-  } catch {}
+    return marks ? marks.code === true : false;
+  } catch {
+    return false;
+  }
 };
 
 const Leaf = ({ attributes, children, leaf }) => {
@@ -288,7 +293,7 @@ const Leaf = ({ attributes, children, leaf }) => {
   return <span {...attributes}>{children}</span>;
 };
 
-const HoveringToolbar = () => {
+const HoveringToolbar = ({ onEdit }) => {
   const ref = useRef(null);
   const editor = useSlate();
   const inFocus = useFocused();
@@ -326,43 +331,34 @@ const HoveringToolbar = () => {
           e.preventDefault();
         }}
       >
-        <FormatButton format="code" />
+        <Button
+          onEdit={onEdit}
+          onClick={() => {
+            toggleMark(editor);
+          }}
+        >
+          {isMarkActive(editor) ? (
+            <>
+              <ClearRoundedIcon
+                sx={{
+                  position: 'relative',
+                  zIndex: '3',
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <DriveFileRenameOutlineRoundedIcon
+                sx={{
+                  position: 'relative',
+                  zIndex: '3',
+                }}
+              />
+            </>
+          )}
+        </Button>
       </Menu>
     </Portal>
-  );
-};
-
-const FormatButton = ({ format }) => {
-  const editor = useSlate();
-
-  return (
-    <Button
-      reversed
-      active={isMarkActive(editor, format)}
-      onClick={() => {
-        toggleMark(editor, format);
-      }}
-    >
-      {isMarkActive(editor, format) ? (
-        <>
-          <ClearRoundedIcon
-            sx={{
-              position: 'relative',
-              zIndex: '3',
-            }}
-          />
-        </>
-      ) : (
-        <>
-          <DriveFileRenameOutlineRoundedIcon
-            sx={{
-              position: 'relative',
-              zIndex: '3',
-            }}
-          />
-        </>
-      )}
-    </Button>
   );
 };
 
