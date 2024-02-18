@@ -97,6 +97,17 @@ const Diary = memo(({ diary, idx, lastDiaryRef, removeDiary, onEditDiaryID, setO
   const diaryRef = useRef(null);
   const readRef = useRef(null);
   const [minHeight, setMinHeight] = useState(0);
+  const [todoList, setTodoList] = useState({
+    extracted: new Map(diary.extracted_todos),
+    manual: new Map(diary.manual_todos),
+  });
+
+  useEffect(() => {
+    setTodoList({
+      extracted: new Map(diary.extracted_todos),
+      manual: new Map(diary.manual_todos),
+    });
+  }, [diary]);
 
   useEffect(() => {
     setMinHeight(diaryRef.current.clientHeight);
@@ -138,7 +149,7 @@ const Diary = memo(({ diary, idx, lastDiaryRef, removeDiary, onEditDiaryID, setO
           <div style={{ width: '1px', height: '1px' }} />
         </span>
         <div dangerouslySetInnerHTML={{ __html: diary.content_html }} className={css.diaryCotentContainer} />
-        <TodoList todoList={{ extracted: diary.extracted_todos, manual: diary.manual_todos }} diaryId={diary.diary_id} />
+        <TodoList todoList={todoList} setTodoList={setTodoList} diaryId={diary.diary_id} />
       </div>
       {onEditDiaryID === diary.diary_id && <WriteForm diaryId={diary.diary_id} idx={idx} setContainerMinHeight={setContainerMinHeight} />}
     </article>

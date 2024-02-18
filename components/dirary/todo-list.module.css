@@ -10,9 +10,12 @@
   font-weight: 700;
 }
 
+.todoCategoryTitle > span {
+  margin-right: 2px;
+}
+
 .todoCategoryTitle > button {
-  margin-top: -2px;
-  margin-left: 3px;
+  margin-top: -1px;
 }
 
 .todoCategoryTitle > button > svg {

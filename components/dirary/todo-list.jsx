@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
@@ -15,38 +15,10 @@ import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 
 import css from 'components/dirary/todo-list.module.css';
 
-const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
+const TodoList = ({ todoList, setTodoList, diaryId, onEdit, addTodoItem }) => {
   const isWrite = !diaryId;
 
-  if (!isWrite) {
-    const list = {
-      extracted: new Map(todoList.extracted),
-      manual: new Map(todoList.manual),
-    };
-    [todoList, setTodoList] = useState(list);
-  }
-
   const { extracted, manual } = todoList;
-
-  const [keyNumber, setKeyNumber] = useState(0);
-
-  const newTodoItem = useCallback(() => {
-    setTodoList((prevTodoList) => {
-      const list = new Map(prevTodoList.manual);
-
-      list.set(`manual-${keyNumber}`, {
-        done: false,
-        text: '새로운 일',
-      });
-
-      return {
-        ...prevTodoList,
-        manual: list,
-      };
-    });
-
-    setKeyNumber((prevKey) => prevKey + 1);
-  }, [keyNumber]);
 
   return (
     <div
@@ -58,9 +30,7 @@ const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
           <h4 className={css.todoCategoryTitle}>다이어리</h4>
           <ul className={css.todoList}>
             {Array.from(extracted).map((todo) => {
-              return (
-                <TodoItem key={todo[0]} todo={todo} place="extracted" setTodoList={setTodoList} isWrite={isWrite} diaryId={diaryId} onEdit={onEdit} />
-              );
+              return <TodoItem key={todo[0]} todo={todo} place="extracted" setTodoList={setTodoList} isWrite={isWrite} diaryId={diaryId} />;
             })}
           </ul>
         </>
@@ -70,7 +40,7 @@ const TodoList = ({ todoList, setTodoList, diaryId, onEdit }) => {
         <span className={css.todoCategoryTitle} style={extracted && extracted.size > 0 ? { marginTop: '16px' } : null}>
           <span>추가</span>
           {isWrite && (
-            <Button onClick={newTodoItem}>
+            <Button onClick={addTodoItem}>
               <AddBoxRoundedIcon />
             </Button>
           )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
@@ -20,7 +20,7 @@ import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import css from 'components/dirary/write-form.module.css';
 import global from 'app/globals.module.css';
 
-const WriteForm = ({ diaryId, idx, setContainerMinHeight }) => {
+const WriteForm = ({ diaryId, idx }) => {
   const { status } = useSession();
 
   const onEdit = Boolean(diaryId);
@@ -37,6 +37,7 @@ const WriteForm = ({ diaryId, idx, setContainerMinHeight }) => {
   const [isSecret, setIsSecret] = useState(false);
   const [slateIsEmpty, setSlateIsEmpty] = useState(!onEdit);
   const [diary, setDiary] = useState(null);
+  const [keyNumber, setKeyNumber] = useState(0);
 
   const setDiaries = useSetRecoilState(diariesState);
   const setOnEditDiaryID = useSetRecoilState(onEditDiaryIdState);
@@ -67,21 +68,17 @@ const WriteForm = ({ diaryId, idx, setContainerMinHeight }) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (isLoaded && onEdit) {
-      setContainerMinHeight(`${formRef.current.clientHeight + 61}px`);
-    }
-  }, [isLoaded]);
-
   const loadDiary = async () => {
     try {
       const prevDiary = status === 'authenticated' ? await serverDB.readDiary(diaryId) : await clientDB.readDiary(diaryId);
 
       const { title, extracted_todos, manual_todos } = prevDiary;
+      const lastTodoKeyNumber = manual_todos.length !== 0 ? Number(manual_todos[manual_todos.length - 1][0].slice(7)) : -1;
 
       setDiary(prevDiary);
       setDiaryTitle(title);
       setTodoList({ extracted: new Map(extracted_todos), manual: new Map(manual_todos) });
+      setKeyNumber(lastTodoKeyNumber + 1);
 
       setIsLoaded(true);
     } catch (error) {
@@ -161,7 +158,6 @@ const WriteForm = ({ diaryId, idx, setContainerMinHeight }) => {
 
     try {
       if (status === 'authenticated') await serverDB[action](newDiary);
-      console.log('tetet');
       await clientDB[action](newDiary);
 
       handler();
@@ -199,6 +195,24 @@ const WriteForm = ({ diaryId, idx, setContainerMinHeight }) => {
     setOnEditDiaryID(null);
   };
 
+  const addTodoItem = useCallback(() => {
+    setTodoList((prevTodoList) => {
+      const list = new Map(prevTodoList.manual);
+
+      list.set(`manual-${keyNumber}`, {
+        done: false,
+        text: '새로운 일',
+      });
+
+      return {
+        ...prevTodoList,
+        manual: list,
+      };
+    });
+
+    setKeyNumber((prevKey) => prevKey + 1);
+  }, [keyNumber]);
+
   return (
     <div ref={formRef} className={clsx(css.newWriteContainer, { [css.editContainer]: onEdit }, { [css.loadedContainer]: isLoaded })}>
       <form className={css.form}>
@@ -225,7 +239,7 @@ const WriteForm = ({ diaryId, idx, setContainerMinHeight }) => {
         <div className={global.divLine} />
 
         <section className={css.bottom}>
-          <TodoList todoList={todoList} setTodoList={setTodoList} onEdit={onEdit} />
+          <TodoList todoList={todoList} setTodoList={setTodoList} addTodoItem={addTodoItem} onEdit={onEdit} />
           <fieldset className={css.buttonContainer}>
             {onEdit && (
               <Button className={css.cancelEditButton} onClick={closeOnEdit}>
