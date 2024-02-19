@@ -4,11 +4,11 @@ import WaitingConfirm from 'components/user/waiting-confirm';
 
 const Setting = () => {
   return (
-    <main>
+    <>
       <Options />
       <Greeting />
       <WaitingConfirm />
-    </main>
+    </>
   );
 };
 

@@ -112,7 +112,7 @@ const Diary = memo(({ diary, idx, lastDiaryRef, removeDiary, onEditDiaryID, setO
   useEffect(() => {
     setMinHeight(diaryRef.current.clientHeight);
     setContainerMinHeight(`${diaryRef.current.clientHeight}px`);
-    if (readRef.current) readRef.current.style.position = 'absolute';
+    if (readRef && readRef.current) readRef.current.style.position = 'absolute';
   }, [diaryRef]);
 
   useEffect(() => {
@@ -127,8 +127,8 @@ const Diary = memo(({ diary, idx, lastDiaryRef, removeDiary, onEditDiaryID, setO
 
   return (
     <article ref={diaryRef} className={css.diaryContainer}>
-      <div ref={lastDiaryRef || readRef} className={clsx(css.diaryRead, { [css.diaryHidden]: onEditDiaryID === diary.diary_id })}>
-        <span className={css.diaryTitle}>
+      <div ref={readRef} className={clsx(css.diaryRead, { [css.diaryHidden]: onEditDiaryID === diary.diary_id })}>
+        <span ref={lastDiaryRef} className={css.diaryTitle}>
           {diary.title}
           <div className={css.diaryButtonContainer}>
             <Button

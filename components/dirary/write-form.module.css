@@ -4,7 +4,7 @@
 
   padding: 15px;
 
-  border-radius: 0.8rem;
+  border-radius: 1.4rem;
   background-color: #fefcff;
 
   box-shadow:
@@ -12,15 +12,9 @@
     rgba(17, 17, 26, 0.08) 0px 16px 40px;
 
   overflow: hidden;
-
   opacity: 0;
 
   transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.loadedContainer {
-  height: fit-content;
-  opacity: 1;
 }
 
 .newWriteContainer::before {
@@ -31,9 +25,15 @@
   width: 100%;
   height: 100%;
 
+  border-radius: 1.4rem;
   z-index: 0;
   background: url("https://www.transparenttextures.com/patterns/cardboard-flat.png");
   opacity: 0.2;
+}
+
+.loadedContainer {
+  height: fit-content;
+  opacity: 1;
 }
 
 .form {
@@ -52,7 +52,7 @@
   width: 100%;
 
   color: #202020;
-  font-size: 1.5rem;
+  font-size: 2.7rem;
   font-weight: 900;
 
   overflow: hidden;
@@ -78,8 +78,8 @@
 }
 
 .buttonContainer > button:first-child > svg {
-  width: 1.3rem;
-  height: 1.3rem;
+  width: 2.4rem;
+  height: 2.4rem;
 }
 
 .buttonContainer > button:first-child {
@@ -87,14 +87,14 @@
   margin-right: 30px;
 }
 
-.buttonContainer > button:nth-last-child(2) > svg {
-  width: 1.7rem;
-  height: 1.7rem;
+.buttonContainer > button:nth-last-child(2) {
+  margin-top: -1px;
+  margin-right: 8px;
 }
 
-.buttonContainer > button:nth-last-child(2) {
-  margin-top: 0;
-  margin-right: 8px;
+.buttonContainer > button:nth-last-child(2) > svg {
+  width: 3.1rem;
+  height: 3.1rem;
 }
 
 .editContainer {

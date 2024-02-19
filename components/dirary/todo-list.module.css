@@ -7,6 +7,7 @@
   align-items: center;
 
   color: #757575;
+  font-size: 1.8rem;
   font-weight: 700;
 }
 
@@ -19,8 +20,8 @@
 }
 
 .todoCategoryTitle > button > svg {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 2.3rem;
+  height: 2.3rem;
 }
 
 .todoList {
@@ -29,7 +30,7 @@
   list-style: none;
   line-height: 1.8;
 
-  min-height: 1.5rem;
+  min-height: 2.7rem;
 }
 
 .todoItem {
@@ -48,8 +49,8 @@
 .todoItem > svg {
   margin-top: 1px;
   margin-right: 5px;
-  width: 1.3rem;
-  height: 1.3rem;
+  width: 2.3rem;
+  height: 2.3rem;
 
   transition: fill 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
@@ -62,6 +63,7 @@
 }
 
 .todoTitleContainer {
+  margin-left: -3px;
   display: flex;
   align-items: center;
 
@@ -76,12 +78,14 @@
 }
 
 .todoStatus {
-  margin-right: 5px;
+  width: 3.2rem;
+  height: 3.2rem;
+  margin-top: 1px;
 }
 
 .todoStatus > svg {
-  width: 1.3rem;
-  height: 1.3rem;
+  width: 2.3rem;
+  height: 2.3rem;
 
   fill: #ccc;
 }

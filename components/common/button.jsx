@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 
+import { gothicA1 } from 'app/fonts';
 import global from 'app/globals.module.css';
 
 const Button = ({ children, onClick, className, selected, disabled }) => {

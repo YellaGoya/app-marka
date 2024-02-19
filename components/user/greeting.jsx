@@ -29,7 +29,7 @@ const Greeting = () => {
   return (
     <div className={css.greetingContainer}>
       {tab === 0 ? (
-        <>
+        <span className={css.syncWrapper}>
           <Button
             onClick={() => {
               setTab(1);
@@ -44,7 +44,7 @@ const Greeting = () => {
           >
             태그 등록
           </Button>
-        </>
+        </span>
       ) : tab === 1 ? (
         <LoginForm
           backward={() => {
