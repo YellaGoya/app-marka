@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, memo } from 'react';
+import { useEffect, useState, useRef, useCallback, memo, use } from 'react';
 import { useRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
@@ -17,12 +17,15 @@ import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 import css from 'components/dirary/my-diaries.module.css';
+import global from 'app/globals.module.css';
 
 const MyDiaries = () => {
   const { status } = useSession();
 
   const [diaries, setDiaries] = useRecoilState(diariesState);
   const [onEditDiaryID, setOnEditDiaryID] = useRecoilState(onEditDiaryIdState);
+
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (status !== 'loading') getMyDiaries({ isLazy: false });
@@ -50,6 +53,7 @@ const MyDiaries = () => {
       const newDiaries = status === 'authenticated' ? await serverDB.readDiaries(isLazy) : await clientDB.readDiaries(isLazy);
 
       setDiaries((prevDiaries) => (isLazy ? [...prevDiaries, ...newDiaries] : newDiaries));
+      setIsLoaded(true);
     } catch {}
   };
 
@@ -70,7 +74,7 @@ const MyDiaries = () => {
   );
 
   return (
-    <div className={css.diariesContainer}>
+    <div className={clsx(css.diariesContainer, { [global.loaded]: isLoaded })}>
       {diaries &&
         diaries.map((diary, idx) => {
           return (

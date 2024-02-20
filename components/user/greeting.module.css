@@ -1,41 +1,44 @@
-.greetingContainer {
-  position: relative;
-
-  padding: 15px;
-
-  border-radius: 1.4rem;
-  background-color: #fefcff;
-
-  box-shadow:
-    rgba(17, 17, 26, 0.05) 0px 8px 16px,
-    rgba(17, 17, 26, 0.08) 0px 16px 40px;
+.syncContainer {
+  min-height: 108px;
 }
 
-.greetingContainer::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
+.buttonSyncWrapper {
   width: 100%;
-  height: 100%;
 
-  border-radius: 1.4rem;
-  z-index: 0;
-  background: url("https://www.transparenttextures.com/patterns/cardboard-flat.png");
-  opacity: 0.2;
-}
-
-.greetingContainer > * {
-  position: relative;
-  z-index: 1;
-}
-
-.syncWrapper {
-  width: 100%;
   display: flex;
   align-items: center;
+  opacity: 1;
 }
 
-.syncWrapper > button {
+.buttonSyncWrapper > button {
   font-size: 1.8rem;
+}
+
+.buttonSyncWrapper > button:first-child {
+  margin-right: 24px;
+}
+
+.buttonSync > svg {
+  width: 24px;
+  height: 24px;
+  fill: #757575;
+}
+
+.buttonSync > span {
+  display: inline-block;
+}
+
+@media (hover: hover) {
+  .buttonSync:hover > svg {
+    fill: #000;
+  }
+
+  .buttonSync > span {
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .buttonSync:hover > span {
+    border-color: #000;
+  }
 }

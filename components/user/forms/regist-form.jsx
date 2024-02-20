@@ -1,10 +1,15 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect } from 'react';
+
 import { putOnWaitingList } from 'lib/action/user';
 import { test } from 'lib/action/user';
+
 import Button from 'components/common/button';
-import { useEffect } from 'react';
+
+import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
+import common from '../common.module.css';
 
 const RegistForm = ({ backward, forward }) => {
   const initialState = { success: null, message: null, errors: {} };
@@ -18,7 +23,18 @@ const RegistForm = ({ backward, forward }) => {
 
   return (
     <div>
-      <form action={dispatch}>
+      <h1 className={common.userTitle}>
+        <Button
+          className={common.buttonBack}
+          onClick={() => {
+            backward();
+          }}
+        >
+          <UndoRoundedIcon />
+        </Button>
+        &nbsp;&nbsp;|&nbsp;&nbsp;태그 등록
+      </h1>
+      <form className={common.form} action={dispatch}>
         <label>
           태그:
           <input type="text" name="tag" />
@@ -61,14 +77,6 @@ const RegistForm = ({ backward, forward }) => {
       >
         test!!!
       </button>
-
-      <Button
-        onClick={() => {
-          backward();
-        }}
-      >
-        뒤로
-      </Button>
     </div>
   );
 };
@@ -77,9 +85,9 @@ const SubmitButton = () => {
   const { pending } = useFormStatus();
 
   return (
-    <button type="submit" aria-disabled={pending}>
-      Log in
-    </button>
+    <Button type="submit" aria-disabled={pending}>
+      등록 완료
+    </Button>
   );
 };
 

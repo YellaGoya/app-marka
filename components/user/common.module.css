@@ -1,0 +1,61 @@
+.userTitle {
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 24px;
+
+  color: #757575;
+  font-size: 2rem;
+  line-height: 1.4;
+}
+
+.userTitle > span {
+  color: #000;
+}
+
+.form input {
+  height: 30px;
+
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  background: transparent;
+
+  outline: none;
+
+  font-size: 1.8rem;
+}
+
+.form input:first-child {
+  margin-right: 24px;
+}
+
+@media (max-width: 510px) {
+  .form input {
+    width: 100%;
+  }
+
+  .form input:first-child {
+    margin-bottom: 10px;
+  }
+}
+
+.form div {
+  margin-top: 10px;
+
+  color: #757575;
+  font-size: 1.4rem;
+}
+
+.buttonBack {
+  display: inline-flex;
+}
+
+.buttonBack > svg {
+  width: 24px;
+  height: 24px;
+  fill: #757575;
+}
+
+.buttonBack:hover > svg {
+  fill: #000;
+}

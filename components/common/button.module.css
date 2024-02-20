@@ -1,0 +1,31 @@
+.button {
+  display: flex;
+  align-items: center;
+
+  border: none;
+  background-color: transparent;
+
+  cursor: pointer;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (hover: hover) {
+  .buttonBasic:hover > svg {
+    fill: #000;
+  }
+}
+
+.buttonBasic > svg {
+  width: 27px;
+  height: 27px;
+  fill: #757575;
+}
+
+.disabledButton {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.selectedButton > svg {
+  fill: #000;
+}

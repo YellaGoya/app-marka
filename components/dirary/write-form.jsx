@@ -214,8 +214,8 @@ const WriteForm = ({ diaryId, idx }) => {
   }, [keyNumber]);
 
   return (
-    <div ref={formRef} className={clsx(css.newWriteContainer, { [css.editContainer]: onEdit }, { [css.loadedContainer]: isLoaded })}>
-      <form className={css.form}>
+    <div ref={formRef} className={clsx(global.cardContainer, css.writeContainer, { [css.editContainer]: onEdit }, { [global.loaded]: isLoaded })}>
+      <form>
         <input
           value={diaryTitle}
           className={css.title}

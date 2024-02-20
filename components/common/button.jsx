@@ -1,18 +1,14 @@
+/* eslint-disable react/button-has-type */
 import clsx from 'clsx';
 
-import { gothicA1 } from 'app/fonts';
-import global from 'app/globals.module.css';
+import css from 'components/common/button.module.css';
 
-const Button = ({ children, onClick, className, selected, disabled }) => {
+const Button = ({ children, onClick, className, selected, disabled, type, ariaDisabled }) => {
   return (
     <button
-      type="button"
-      className={clsx(
-        global.button,
-        className ? className : global.buttonBasic,
-        { [global.selected]: selected },
-        { [global.disabledButton]: disabled },
-      )}
+      type={type || 'button'}
+      aria-disabled={ariaDisabled}
+      className={clsx(css.button, className ? className : css.buttonBasic, { [css.selected]: selected }, { [css.disabledButton]: disabled })}
       onClick={onClick}
     >
       {children}

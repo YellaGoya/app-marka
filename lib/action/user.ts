@@ -24,9 +24,9 @@ export const authenticate = async (prevState: string | undefined, formData: Form
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          return { success: false, error: 'Invalid credentials.' };
+          return { success: false, error: '( ! ) 잘못된 태그 정보 입니다.' };
         default:
-          return { success: false, error: 'Something went wrong.' };
+          return { success: false, error: '( ! ) 연결이 불안정합니다. 다시 시도 해주세요.' };
       }
     }
 
@@ -36,13 +36,13 @@ export const authenticate = async (prevState: string | undefined, formData: Form
 
 const waitingSchema = z
   .object({
-    tag: z.string().min(2, '닉네임은 2글자 이상이어야 합니다.'),
-    email: z.string().email('유효한 이메일을 입력해주세요.'),
-    password: z.string().min(10, '비밀번호는 10자 이상이어야 합니다.'),
+    tag: z.string().min(2, '( ! ) 닉네임은 2글자 이상이어야 합니다.'),
+    email: z.string().email('( ! ) 유효한 이메일을 입력해주세요.'),
+    password: z.string().min(10, '( ! ) 비밀번호는 10자 이상이어야 합니다.'),
     confirmPassword: z.string(),
   })
   .refine((data: { password: string; confirmPassword: string }) => data.password === data.confirmPassword, {
-    message: '비밀번호와 비밀번호 확인이 일치하지 않습니다.',
+    message: '( ! ) 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
     path: ['confirmPassword'],
   })
   .refine(
@@ -51,7 +51,7 @@ const waitingSchema = z
       return !isDuplicated;
     },
     {
-      message: '이미 등록된 태그입니다.',
+      message: '( ! ) 이미 등록된 태그입니다.',
       path: ['tag'],
     },
   )
@@ -61,7 +61,7 @@ const waitingSchema = z
       return !isDuplicated;
     },
     {
-      message: '이미 등록된 이메일입니다.',
+      message: '( ! ) 이미 등록된 이메일입니다.',
       path: ['email'],
     },
   );
