@@ -31,6 +31,7 @@
     "nodemailer": "^6.9.8",
     "pg": "^8.11.3",
     "react": "^18",
+    "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "recoil": "^0.7.7",
     "slate": "^0.101.5",

@@ -65,14 +65,14 @@
 
   margin-left: -15px;
 
-  background-color: #333;
+  background-color: #333 !important;
 }
 
 .editContainer::before {
   opacity: 0.05;
 }
 
-.editContainer .form > * {
+.editContainer form > * {
   color: #fff;
 }
 

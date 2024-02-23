@@ -21,6 +21,7 @@ export const authenticate = async (prevState: string | undefined, formData: Form
 
     return { success: true };
   } catch (error) {
+    console.log(error);
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
@@ -30,7 +31,7 @@ export const authenticate = async (prevState: string | undefined, formData: Form
       }
     }
 
-    throw error;
+    return { success: false, error: '( ! ) 연결이 불안정합니다. 다시 시도 해주세요.' };
   }
 };
 

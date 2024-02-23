@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { openDB, IDBPDatabase } from 'idb';
-import { getServerTime } from 'lib/action/time';
+import { getServerTime } from 'lib/api/time';
 import { Diary } from 'lib/type-def';
 
 // 싱글턴 인스턴스를 저장할 변수를 정의합니다.

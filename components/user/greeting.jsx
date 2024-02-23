@@ -25,11 +25,11 @@ const Greeting = () => {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      setTab(1); // 3
+      setTab(3); // 3
     }
 
     if (status === 'unauthenticated') {
-      setTab(1); // 0
+      setTab(0); // 0
     }
   }, [status]);
 

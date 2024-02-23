@@ -21,6 +21,17 @@ export const authConfig = {
       return session;
     },
   },
+  logger: {
+    error(code) {
+      console.error('Error:', code.name);
+    },
+    warn(code) {
+      console.warn(code);
+    },
+    debug(code, ...message) {
+      console.debug(code, message);
+    },
+  },
 } satisfies NextAuthConfig;
 // export const authConfig = {
 //   pages: {

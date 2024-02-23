@@ -1,3 +1,7 @@
+:root {
+  --code-bg-color: #dddddd;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -16,6 +20,8 @@ a {
 html {
   font-size: 10px;
   height: 100vh;
+
+  overflow-y: scroll;
 }
 
 input,

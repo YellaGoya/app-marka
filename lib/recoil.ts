@@ -9,3 +9,8 @@ export const onEditDiaryIdState = atom({
   key: 'onEditDiaryIdState',
   default: null,
 });
+
+export const codeColorState = atom({
+  key: 'codeColorState',
+  default: { default: '#ddd', user: null },
+});

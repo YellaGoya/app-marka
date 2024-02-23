@@ -13,7 +13,56 @@
   color: #000;
 }
 
+.form {
+  /* 내부엘레먼트 수평으로 중앙정렬 1줄로 배치 */
+  position: relative;
+  display: flex;
+
+  align-items: center;
+  flex-direction: column;
+}
+
+.form > svg {
+  width: 27px;
+  height: 27px;
+
+  margin-bottom: -10px;
+
+  opacity: 0.35;
+}
+
+.form > svg:nth-child(4) {
+  margin-top: 24px;
+}
+
+.form label {
+  max-width: 360px;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.form label:not(:first-child) {
+  margin-top: 20px;
+}
+
+.form label > div > span {
+  position: absolute;
+  opacity: 0.6;
+
+  font-size: 1.8rem;
+  font-family: "malgun gothic";
+
+  transform-origin: left center;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* // 마우스 이벤트 제거 */
+  pointer-events: none;
+}
+
 .form input {
+  width: 100%;
   height: 30px;
 
   border: none;
@@ -23,10 +72,18 @@
   outline: none;
 
   font-size: 1.8rem;
+  font-family: "malgun gothic";
+
+  transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.form input:first-child {
-  margin-right: 24px;
+.form input:focus {
+  border-color: #000;
+}
+
+.form input:focus + span,
+.form input:not(:placeholder-shown) + span {
+  transform: translateY(-22px) scale(0.8);
 }
 
 @media (max-width: 510px) {
@@ -39,11 +96,19 @@
   }
 }
 
-.form div {
-  margin-top: 10px;
+.form div:first-child {
+  display: flex;
+  align-items: center;
+}
 
-  color: #757575;
+.form div:nth-child(2) {
+  width: 100%;
+
+  color: #0059ff;
+  opacity: 0.75;
   font-size: 1.4rem;
+
+  font-family: "malgun gothic";
 }
 
 .buttonBack {
@@ -58,4 +123,40 @@
 
 .buttonBack:hover > svg {
   fill: #000;
+}
+
+.buttonSubmit {
+  display: inline-flex;
+  margin: 36px 0 4px 0;
+  font-size: 1.8rem;
+}
+
+.buttonSubmit > svg {
+  width: 24px;
+  height: 24px;
+  fill: #757575;
+}
+
+@media (hover: hover) {
+  .buttonSubmit:hover > svg {
+    fill: #000;
+  }
+
+  .buttonSubmit > span {
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .buttonSubmit:hover > span {
+    border-color: #000;
+  }
+}
+
+@media (max-width: 510px) {
+  .buttonSubmit {
+    display: flex;
+    margin-left: auto;
+
+    /* margin-top: 24px; */
+  }
 }

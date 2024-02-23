@@ -4,11 +4,13 @@ import { useFormState, useFormStatus } from 'react-dom';
 import { useEffect } from 'react';
 
 import { putOnWaitingList } from 'lib/action/user';
-import { test } from 'lib/action/user';
 
 import Button from 'components/common/button';
 
 import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
+import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
+import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import common from '../common.module.css';
 
 const RegistForm = ({ backward, forward }) => {
@@ -16,7 +18,7 @@ const RegistForm = ({ backward, forward }) => {
   const [result, dispatch] = useFormState(putOnWaitingList, initialState);
 
   useEffect(() => {
-    if (result.success) {
+    if (result && result.success) {
       forward();
     }
   }, [result]);
@@ -35,48 +37,51 @@ const RegistForm = ({ backward, forward }) => {
         &nbsp;&nbsp;|&nbsp;&nbsp;태그 등록
       </h1>
       <form className={common.form} action={dispatch}>
+        <PersonRoundedIcon />
+
         <label>
-          태그:
-          <input type="text" name="tag" />
+          <div>
+            <input type="text" name="tag" placeholder=" " />
+            <span>태그(ID)</span>
+          </div>
           <div id="tag-error" aria-live="polite" aria-atomic="true">
-            {result.errors?.tag && result.errors.tag.map((error) => <p key={error}>{error}</p>)}
+            {result && result.errors?.tag && result.errors.tag.map((error) => <p key={error}>{error}</p>)}
           </div>
         </label>
-
         <label>
-          이메일:
-          <input type="email" name="email" />
+          <div>
+            <input type="email" name="email" placeholder=" " />
+            <span>이메일</span>
+          </div>
           <div id="email-error" aria-live="polite" aria-atomic="true">
-            {result.errors?.email && result.errors.email.map((error) => <p key={error}>{error}</p>)}
+            {result && result.errors?.email && result.errors.email.map((error) => <p key={error}>{error}</p>)}
           </div>
         </label>
 
+        <PasswordRoundedIcon />
+
         <label>
-          비밀번호:
-          <input type="password" name="password" />
+          <div>
+            <input type="password" name="password" placeholder=" " />
+            <span>비밀번호</span>
+          </div>
           <div id="password-error" aria-live="polite" aria-atomic="true">
-            {result.errors?.password && result.errors.password.map((error) => <p key={error}>{error}</p>)}
+            {result && result.errors?.password && result.errors.password.map((error) => <p key={error}>{error}</p>)}
           </div>
         </label>
 
         <label>
-          비밀번호 확인:
-          <input type="password" name="confirmPassword" />
+          <div>
+            <input type="password" name="confirmPassword" placeholder=" " />
+            <span>비밀번호 확인</span>
+          </div>
           <div id="confirmPassword-error" aria-live="polite" aria-atomic="true">
-            {result.errors?.confirmPassword && result.errors.confirmPassword.map((error) => <p key={error}>{error}</p>)}
+            {result && result.errors?.confirmPassword && result.errors.confirmPassword.map((error) => <p key={error}>{error}</p>)}
           </div>
         </label>
 
         <SubmitButton />
       </form>
-      <button
-        type="button"
-        onClick={() => {
-          test();
-        }}
-      >
-        test!!!
-      </button>
     </div>
   );
 };
@@ -85,8 +90,9 @@ const SubmitButton = () => {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" aria-disabled={pending}>
-      등록 완료
+    <Button className={common.buttonSubmit} type="submit" aria-disabled={pending}>
+      <span>등록</span>
+      <ExitToAppRoundedIcon />
     </Button>
   );
 };

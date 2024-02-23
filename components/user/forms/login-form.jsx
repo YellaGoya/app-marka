@@ -1,20 +1,32 @@
 'use client';
 
+import { useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 
 import { authenticate } from 'lib/action/user';
 import Button from 'components/common/button';
 import { useEffect } from 'react';
 // import { resourceLimits } from 'worker_threads';
+
 import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
+import CloudSyncRoundedIcon from '@mui/icons-material/CloudSyncRounded';
 import common from '../common.module.css';
 
 const LoginForm = ({ backward, forward }) => {
-  const initialState = { success: null, error: null };
-  const [result, dispatch] = useFormState(authenticate, initialState);
+  const [result, dispatch] = useFormState(authenticate, { success: null, error: null });
+  // const [result, setResult] = useState({ success: null, error: null });
+
+  // const loginDispatch = async (form) => {
+  //   try {
+  //     setResult(await authenticate(form));
+  //     // console.log('no problem here.');
+  //   } catch {
+  //     console.log('error occured.');
+  //   }
+  // };
 
   useEffect(() => {
-    if (result.success) {
+    if (result && result.success) {
       forward();
     }
   }, [result]);
@@ -33,11 +45,21 @@ const LoginForm = ({ backward, forward }) => {
         &nbsp;&nbsp;|&nbsp;&nbsp;데이터베이스 연동
       </h1>
       <form className={common.form} action={dispatch}>
-        <input type="text" name="tag" placeholder="태그" autoComplete="off" />
-        <input type="password" name="password" placeholder="비밀번호" />
-        <div aria-live="polite" aria-atomic="true">
-          {result.error && <p className="text-sm text-red-500">{result.error}</p>}
-        </div>
+        <label>
+          <div>
+            <input type="text" name="tag" autoComplete="off" placeholder=" " />
+            <span>태그</span>
+          </div>
+        </label>
+        <label>
+          <div>
+            <input type="password" name="password" placeholder=" " />
+            <span>비밀번호</span>
+          </div>
+          <div aria-live="polite" aria-atomic="true">
+            {result && result.error && <p>{result.error}</p>}
+          </div>
+        </label>
         <LoginButton />
       </form>
     </div>
@@ -48,8 +70,9 @@ const LoginButton = () => {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" aria-disabled={pending}>
-      연동
+    <Button className={common.buttonSubmit} type="submit" aria-disabled={pending}>
+      <span>연동</span>
+      <CloudSyncRoundedIcon />
     </Button>
   );
 };

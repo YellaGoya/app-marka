@@ -5,7 +5,7 @@ import { useSetRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
 
-import { getServerTime } from 'lib/action/time';
+import { getServerTime } from 'lib/api/time';
 import { diariesState, onEditDiaryIdState } from 'lib/recoil';
 import * as clientDB from 'lib/indexed-db';
 import * as serverDB from 'lib/api/diary';

@@ -14,6 +14,14 @@ const getUser = async (tag: string): Promise<User> => {
   return rows[0];
 };
 
+const getUsersByTag = async (tag: string): Promise<User[]> => {
+  const { rows } = await useSQL((conn: PoolClient) => {
+    return conn.query('SELECT user_id, tag, email FROM users WHERE tag LIKE $1', [tag + '%']);
+  });
+
+  return rows;
+};
+
 const checkUserByTag = async (tag: string): Promise<boolean> => {
   const { rows } = await useSQL((conn: PoolClient) => {
     return conn.query('SELECT EXISTS (SELECT 1 FROM users WHERE tag = $1 UNION SELECT 1 FROM waiting WHERE tag = $1)', [tag]);
@@ -71,4 +79,4 @@ const approveUser = async (list_id: number): Promise<any> => {
   return rows;
 };
 
-export { getUser, checkUserByTag, checkUserByEmail, getWaitingList, approveUser };
+export { getUser, getUsersByTag, checkUserByTag, checkUserByEmail, getWaitingList, approveUser };

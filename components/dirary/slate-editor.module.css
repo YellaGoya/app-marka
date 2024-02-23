@@ -19,8 +19,9 @@
 .slateEditor code {
   padding: 1px 9px 2px 9px;
 
+  color: var(--code-color);
   font-family: "Malgun Gothic";
-  background-color: #ddd;
+  background-color: var(--code-bg-color);
 
   border-radius: 8px;
 }

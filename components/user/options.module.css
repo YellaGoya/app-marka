@@ -1,0 +1,27 @@
+.sliderContainer {
+  margin-top: 28px;
+  margin-bottom: 21px;
+}
+
+.code {
+  padding: 1px 9px 2px 9px;
+
+  color: var(--code-color);
+  font-size: 1.8rem;
+  font-family: "Malgun Gothic";
+  background-color: var(--code-bg-color);
+
+  border-radius: 8px;
+
+  transition:
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.default {
+  margin-left: 18px;
+
+  color: #000000;
+  background-color: #dddddd;
+  cursor: pointer;
+}
