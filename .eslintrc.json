@@ -29,16 +29,16 @@
     "complexity": ["error", 25],
     "no-negated-condition": "off",
     "capitalized-comments": "off",
-    "react/prop-types": "off",
-    "react/jsx-no-useless-fragment": "off",
     "new-cap": ["error", { "newIsCap": false, "capIsNew": false }],
     "react/display-name": "off",
     "guard-for-in": "off",
-    "react/hook-use-state": "off",
-    "react-hooks/rules-of-hooks": "off",
-    "react-hooks/exhaustive-deps": "off",
     "camelcase": "off",
+    "no-await-in-loop": "off",
+    "react/hook-use-state": "off",
     "react/no-danger": "off",
-    "no-await-in-loop": "off"
+    "react/prop-types": "off",
+    "react/jsx-no-useless-fragment": "off",
+    "react-hooks/rules-of-hooks": "off",
+    "react-hooks/exhaustive-deps": "off"
   }
 }

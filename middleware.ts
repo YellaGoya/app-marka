@@ -20,7 +20,7 @@ export const middleware = (req: NextRequest) => {
     const now = Date.now();
     const windowMs = 60 * 1000;
     const blockDuration = 15 * 60 * 1000;
-    const max = 30;
+    const max = 60;
 
     if (!store[ip] || (now > store[ip].timestamp && now > store[ip].blockUntil)) {
       store[ip] = { count: 1, timestamp: now + windowMs, blockUntil: 0 };

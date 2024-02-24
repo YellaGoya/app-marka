@@ -1,5 +1,11 @@
+import Following from 'components/explore/following';
+
 const Explore = () => {
-  return <div>page</div>;
+  return (
+    <>
+      <Following />
+    </>
+  );
 };
 
 export default Explore;

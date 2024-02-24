@@ -17,7 +17,7 @@ import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 import css from 'components/dirary/my-diaries.module.css';
-import global from 'app/globals.module.css';
+import global from 'app/global.module.css';
 
 const MyDiaries = () => {
   const { status } = useSession();
@@ -26,6 +26,7 @@ const MyDiaries = () => {
   const [onEditDiaryID, setOnEditDiaryID] = useRecoilState(onEditDiaryIdState);
 
   const [isLoaded, setIsLoaded] = useState(false);
+  const [pageNumber, setPageNumber] = useState(0);
 
   useEffect(() => {
     if (status !== 'loading') getMyDiaries({ isLazy: false });
@@ -43,14 +44,22 @@ const MyDiaries = () => {
       });
       if (node) observer.current.observe(node);
     },
-    [status],
+    [status, pageNumber],
   );
 
   const getMyDiaries = async ({ isLazy }) => {
     if (status === 'loading') return;
+    let newDiaries;
 
     try {
-      const newDiaries = status === 'authenticated' ? await serverDB.readDiaries(isLazy) : await clientDB.readDiaries(isLazy);
+      if (status === 'authenticated') {
+        const result = await serverDB.readDiaries(isLazy ? pageNumber : 0);
+        newDiaries = result.diaries;
+
+        setPageNumber(result.newPageNumber);
+      } else {
+        newDiaries = await clientDB.readDiaries(isLazy);
+      }
 
       setDiaries((prevDiaries) => (isLazy ? [...prevDiaries, ...newDiaries] : newDiaries));
       setIsLoaded(true);
@@ -74,7 +83,7 @@ const MyDiaries = () => {
   );
 
   return (
-    <div className={clsx(css.diariesContainer, { [global.loaded]: isLoaded })}>
+    <section className={clsx(css.diariesContainer, { [global.loaded]: isLoaded })}>
       {diaries &&
         diaries.map((diary, idx) => {
           return (
@@ -89,7 +98,7 @@ const MyDiaries = () => {
             />
           );
         })}
-    </div>
+    </section>
   );
 };
 

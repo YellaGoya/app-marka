@@ -5,8 +5,7 @@ import { SliderPicker } from 'react-color';
 import clsx from 'clsx';
 
 import css from './options.module.css';
-import global from 'app/globals.module.css';
-import common from './common.module.css';
+import global from 'app/global.module.css';
 
 const Options = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -47,8 +46,8 @@ const Options = () => {
   };
 
   return (
-    <div className={clsx(global.cardContainer, { [global.loaded]: isLoaded })} style={{ marginBottom: '24px' }}>
-      <h1 className={common.userTitle}>
+    <section className={clsx(global.cardContainer, { [global.loaded]: isLoaded })} style={{ marginBottom: '24px' }}>
+      <h1 className={global.title}>
         <span>에디터 마카</span>&nbsp;색상 변경
       </h1>
       <SliderPicker className={css.sliderContainer} color={color} onChange={handleChange} />
@@ -56,7 +55,7 @@ const Options = () => {
       <code className={clsx(css.code, css.default)} onClick={backToDefault}>
         (기본) #dddddd
       </code>
-    </div>
+    </section>
   );
 };
 

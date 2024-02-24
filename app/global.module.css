@@ -33,6 +33,7 @@
 
   opacity: 0;
   transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
 }
 
 .cardContainer::before {
@@ -56,6 +57,7 @@
 
 .loaded {
   opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .poweredBy {
@@ -70,4 +72,19 @@
   opacity: 0;
 
   transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 24px;
+
+  color: #757575;
+  font-size: 2rem;
+  line-height: 1.4;
+}
+
+.title > span {
+  color: #000;
 }

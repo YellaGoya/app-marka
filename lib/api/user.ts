@@ -2,9 +2,16 @@
 'use server';
 
 import useSQL from 'lib/api/connection-pool';
-import { User } from 'lib/type-def';
+import { User, SearchResult } from 'lib/type-def';
 import { PoolClient } from 'pg';
 import { auth } from 'lib/auth';
+
+const getSessionUser = async () => {
+  const session = await auth();
+  if (!session?.user) throw new Error('Authorization error: Unauthorized User.');
+
+  return session.user;
+};
 
 const getUser = async (tag: string): Promise<User> => {
   const { rows } = await useSQL((conn: PoolClient) => {
@@ -15,11 +22,61 @@ const getUser = async (tag: string): Promise<User> => {
 };
 
 const getUsersByTag = async (tag: string): Promise<User[]> => {
+  const { id } = await getSessionUser();
+
+  const user_id = Number(id);
+
   const { rows } = await useSQL((conn: PoolClient) => {
-    return conn.query('SELECT user_id, tag, email FROM users WHERE tag LIKE $1', [tag + '%']);
+    return conn.query(
+      'SELECT users.user_id, users.tag, users.email, COALESCE(following.following_id, 0) as following_id FROM users LEFT JOIN following ON users.user_id = following.user_to AND following.user_from = $1 WHERE users.tag LIKE $2',
+      [user_id, tag + '%'],
+    );
   });
 
   return rows;
+};
+
+const getFollowingList = async (pageNumber: number): Promise<SearchResult> => {
+  const { id } = await getSessionUser();
+
+  const user_id = Number(id);
+  const limit = 10;
+  const offset = pageNumber * limit;
+
+  pageNumber++;
+
+  const { rows } = await useSQL((conn: PoolClient) => {
+    return conn.query(
+      'SELECT f.following_id, f.user_to AS user_id, u.tag, u.email FROM following AS f JOIN users AS u ON f.user_to = u.user_id WHERE f.user_from = $1 LIMIT $2 OFFSET $3',
+      [user_id, limit, offset],
+    );
+  });
+
+  return { following: rows, newPageNumber: pageNumber };
+};
+
+const addFollowing = async (target_id: number): Promise<number> => {
+  const { id } = await getSessionUser();
+
+  const user_id = Number(id);
+
+  const { rows } = await useSQL((conn: PoolClient) => {
+    return conn.query('INSERT INTO following (user_from, user_to) VALUES ($1, $2) RETURNING following_id', [user_id, target_id]);
+  });
+
+  return rows[0].following_id;
+};
+
+const deleteFollowing = async (following_id: number) => {
+  const { id } = await getSessionUser();
+
+  const user_id = Number(id);
+
+  const { rowCount } = await useSQL((conn: PoolClient) => {
+    return conn.query('DELETE FROM following WHERE following_id = $1 AND user_from = $2', [following_id, user_id]);
+  });
+
+  if (!rowCount) throw new Error('PostgreSql error: failed to delete following.');
 };
 
 const checkUserByTag = async (tag: string): Promise<boolean> => {
@@ -39,6 +96,9 @@ const checkUserByEmail = async (email: string): Promise<boolean> => {
 };
 
 const getWaitingList = async (): Promise<User[]> => {
+  const session = await auth();
+  if (!session?.user) throw new Error('Authorization error: Unauthorized User.');
+
   const { rows } = await useSQL((conn: PoolClient) => {
     return conn.query('SELECT list_id, tag, email, listed_at FROM waiting');
   });
@@ -79,4 +139,4 @@ const approveUser = async (list_id: number): Promise<any> => {
   return rows;
 };
 
-export { getUser, getUsersByTag, checkUserByTag, checkUserByEmail, getWaitingList, approveUser };
+export { getUser, getUsersByTag, getFollowingList, addFollowing, deleteFollowing, checkUserByTag, checkUserByEmail, getWaitingList, approveUser };

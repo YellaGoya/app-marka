@@ -6,6 +6,13 @@ export type User = {
   created_at: Date;
 };
 
+export type Following = {
+  following_id: number;
+  user_id: number;
+  tag: string;
+  email: string;
+};
+
 export type Waiting = {
   errors?: {
     tag?: string[];
@@ -28,4 +35,9 @@ export type Diary = {
   extracted_todos: Array<TodoList>;
   manual_todos: Array<TodoList>;
   is_secret: boolean;
+};
+
+export type SearchResult = {
+  following: Following[];
+  newPageNumber: number;
 };

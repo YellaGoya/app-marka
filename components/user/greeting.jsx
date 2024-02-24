@@ -14,9 +14,8 @@ import Button from 'components/common/button';
 import CloudSyncRoundedIcon from '@mui/icons-material/CloudSyncRounded';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import common from './common.module.css';
 import css from './greeting.module.css';
-import global from 'app/globals.module.css';
+import global from 'app/global.module.css';
 
 const Greeting = () => {
   const { status } = useSession();
@@ -38,7 +37,7 @@ const Greeting = () => {
       <div className={clsx(global.cardContainer, css.syncContainer, { [global.loaded]: tab !== null })}>
         {tab === 0 ? (
           <>
-            <h1 className={common.userTitle}>
+            <h1 className={global.title}>
               <span>기존 데이터</span>를 연동할 수 있습니다.
             </h1>
             <span className={css.buttonSyncWrapper}>
@@ -83,7 +82,7 @@ const Greeting = () => {
           />
         ) : tab === 3 ? (
           <>
-            <h1 className={common.userTitle}>데이터베이스 연동이 완료되었습니다.</h1>
+            <h1 className={global.title}>데이터베이스 연동이 완료되었습니다.</h1>
             <span className={css.buttonSyncWrapper}>
               <Button
                 className={css.buttonSync}

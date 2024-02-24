@@ -1,0 +1,14 @@
+.exploreTitle {
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 24px;
+
+  color: #757575;
+  font-size: 2rem;
+  line-height: 1.4;
+}
+
+.exploreTitle > span {
+  color: #000;
+}

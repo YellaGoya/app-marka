@@ -18,7 +18,7 @@ import EditOffRoundedIcon from '@mui/icons-material/EditOffRounded';
 import LowPriorityRoundedIcon from '@mui/icons-material/LowPriorityRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import css from 'components/dirary/write-form.module.css';
-import global from 'app/globals.module.css';
+import global from 'app/global.module.css';
 
 const WriteForm = ({ diaryId, idx }) => {
   const { status } = useSession();
@@ -143,7 +143,7 @@ const WriteForm = ({ diaryId, idx }) => {
       editorRef.current.emptyDiary();
 
       try {
-        const diaries = status === 'authenticated' ? await serverDB.readDiaries(false) : await clientDB.readDiaries(false);
+        const diaries = status === 'authenticated' ? await serverDB.readDiaries(0) : await clientDB.readDiaries(false);
 
         setDiaries(diaries);
       } catch (error) {
@@ -214,7 +214,7 @@ const WriteForm = ({ diaryId, idx }) => {
   }, [keyNumber]);
 
   return (
-    <div ref={formRef} className={clsx(global.cardContainer, css.writeContainer, { [css.editContainer]: onEdit }, { [global.loaded]: isLoaded })}>
+    <section ref={formRef} className={clsx(global.cardContainer, css.writeContainer, { [css.editContainer]: onEdit }, { [global.loaded]: isLoaded })}>
       <form>
         <input
           value={diaryTitle}
@@ -255,7 +255,7 @@ const WriteForm = ({ diaryId, idx }) => {
           </fieldset>
         </section>
       </form>
-    </div>
+    </section>
   );
 };
 

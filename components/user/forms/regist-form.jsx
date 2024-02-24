@@ -11,6 +11,7 @@ import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
+import global from 'app/global.module.css';
 import common from '../common.module.css';
 
 const RegistForm = ({ backward, forward }) => {
@@ -25,7 +26,7 @@ const RegistForm = ({ backward, forward }) => {
 
   return (
     <div>
-      <h1 className={common.userTitle}>
+      <h1 className={global.title}>
         <Button
           className={common.buttonBack}
           onClick={() => {

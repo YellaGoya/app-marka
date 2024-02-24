@@ -10,20 +10,22 @@ import { useEffect } from 'react';
 
 import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
 import CloudSyncRoundedIcon from '@mui/icons-material/CloudSyncRounded';
+import global from 'app/global.module.css';
 import common from '../common.module.css';
 
 const LoginForm = ({ backward, forward }) => {
-  const [result, dispatch] = useFormState(authenticate, { success: null, error: null });
-  // const [result, setResult] = useState({ success: null, error: null });
+  const initialState = { success: null, errors: {} };
+  // const [result, dispatch] = useFormState(authenticate, initialState);
+  const [result, setResult] = useState({ success: null, error: null });
 
-  // const loginDispatch = async (form) => {
-  //   try {
-  //     setResult(await authenticate(form));
-  //     // console.log('no problem here.');
-  //   } catch {
-  //     console.log('error occured.');
-  //   }
-  // };
+  const loginDispatch = async (form) => {
+    try {
+      setResult(await authenticate(initialState, form));
+      // console.log('no problem here.');
+    } catch {
+      console.log('error occured.');
+    }
+  };
 
   useEffect(() => {
     if (result && result.success) {
@@ -33,7 +35,7 @@ const LoginForm = ({ backward, forward }) => {
 
   return (
     <div>
-      <h1 className={common.userTitle}>
+      <h1 className={global.title}>
         <Button
           className={common.buttonBack}
           onClick={() => {
@@ -44,7 +46,7 @@ const LoginForm = ({ backward, forward }) => {
         </Button>
         &nbsp;&nbsp;|&nbsp;&nbsp;데이터베이스 연동
       </h1>
-      <form className={common.form} action={dispatch}>
+      <form className={common.form} action={loginDispatch}>
         <label>
           <div>
             <input type="text" name="tag" autoComplete="off" placeholder=" " />

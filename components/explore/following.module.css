@@ -1,0 +1,114 @@
+.search {
+  display: flex;
+  align-items: center;
+}
+
+.search > button {
+  margin-left: auto;
+
+  font-size: 1.8rem;
+}
+
+.search > button span {
+  margin-left: 4px;
+}
+
+.search > button svg {
+  margin-left: 10px;
+  width: 24px;
+  height: 24px;
+}
+
+.search input {
+  max-width: 480px;
+  width: 100%;
+  height: 30px;
+
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  background: transparent;
+
+  outline: none;
+
+  font-size: 1.8rem;
+  font-family: "malgun gothic";
+
+  transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search input:focus {
+  border-color: #000;
+}
+
+@media (max-width: 510px) {
+  .search input {
+    width: 100%;
+  }
+}
+
+.followingContainer {
+  position: absolute;
+  top: 10px;
+  z-index: 10;
+
+  width: fit-content;
+}
+
+.tagList {
+  list-style: none;
+}
+
+.tagList > li {
+  position: relative;
+  padding-right: 45px;
+}
+
+.tagList > li:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.tagList > li:hover > button {
+  opacity: 1;
+}
+
+.tagList button {
+  position: absolute;
+  right: 0;
+
+  top: 50%;
+  transform: translateY(-50%);
+
+  opacity: 0.23;
+
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tagList button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.tagList h4 {
+  font-size: 1.6rem;
+}
+
+.tagList span {
+  font-size: 1.2rem;
+  font-weight: lighter;
+}
+
+.searchContainer {
+  position: absolute;
+  top: 65px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  z-index: 10;
+
+  max-width: 400px;
+  width: 100%;
+}
+
+.followedItem button {
+  opacity: 1 !important;
+}

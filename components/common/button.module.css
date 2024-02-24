@@ -1,6 +1,10 @@
 .button {
+  white-space: nowrap;
+
   display: flex;
   align-items: center;
+
+  color: #000;
 
   border: none;
   background-color: transparent;

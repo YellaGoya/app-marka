@@ -83,16 +83,12 @@
 
 .form input:focus + span,
 .form input:not(:placeholder-shown) + span {
-  transform: translateY(-22px) scale(0.8);
+  transform: translateY(-21px) scale(0.7);
 }
 
 @media (max-width: 510px) {
   .form input {
     width: 100%;
-  }
-
-  .form input:first-child {
-    margin-bottom: 10px;
   }
 }
 
@@ -128,6 +124,8 @@
 .buttonSubmit {
   display: inline-flex;
   margin: 36px 0 4px 0;
+
+  color: #000;
   font-size: 1.8rem;
 }
 

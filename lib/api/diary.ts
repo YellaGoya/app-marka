@@ -6,8 +6,6 @@ import { auth } from 'lib/auth';
 
 import { Diary } from 'lib/type-def';
 
-let pageNumber: number;
-
 const getSessionUser = async () => {
   const session = await auth();
   if (!session?.user) throw new Error('Authorization error: Unauthorized User.');
@@ -127,10 +125,8 @@ const readDiary = async (diary_id: string) => {
   return rows[0];
 };
 
-const readDiaries = async (isLazyLoading: boolean) => {
+const readDiaries = async (pageNumber: number) => {
   const { id } = await getSessionUser();
-
-  if (!isLazyLoading) pageNumber = 0;
 
   const user_id = Number(id);
   const limit = 10;
@@ -142,7 +138,7 @@ const readDiaries = async (isLazyLoading: boolean) => {
     return conn.query('SELECT * FROM diaries WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3', [user_id, limit, offset]);
   });
 
-  return rows;
+  return { diaries: rows, newPageNumber: pageNumber };
 };
 
 export { addDiary, updateDiary, updateStatus, removeDiary, readDiary, readDiaries };

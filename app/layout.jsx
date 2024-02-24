@@ -3,8 +3,8 @@ import Header from 'components/header';
 import RecoilProvider from 'contexts/recoil-provider';
 import AuthProvider from 'contexts/auth-provider';
 
-import 'app/globals.css';
-import global from 'app/globals.module.css';
+import 'app/global.css';
+import global from 'app/global.module.css';
 
 export const metadata = {
   title: 'Marka',
@@ -16,9 +16,9 @@ const RootLayout = ({ children }) => {
     <html lang="kr" className={gothicA1.className}>
       {/* <html lang="kr" className={`${hyRGothic.variable} ${lusitana.variable}`}> */}
       <body>
-        <Header />
         <AuthProvider>
           <RecoilProvider>
+            <Header />
             <main className={global.main}>{children}</main>
           </RecoilProvider>
         </AuthProvider>
