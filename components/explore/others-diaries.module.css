@@ -1,0 +1,103 @@
+.cardContainer {
+  /* 내부 컨텐츠를 수평 최대 3개 */
+  margin-top: 24px;
+  /* display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 40px; */
+
+  column-count: 3;
+  column-gap: 40px;
+}
+
+@media (max-width: 950px) {
+  .cardContainer {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 620px) {
+  .cardContainer {
+    column-count: 1;
+  }
+}
+
+.diaryCard {
+  margin-bottom: 32px;
+  padding: 15px;
+
+  border: 1px solid #f4f4f4;
+  border-radius: 1.4rem;
+  box-shadow:
+    rgba(17, 17, 26, 0.05) 0px 8px 16px,
+    rgba(17, 17, 26, 0.08) 0px 16px 40px;
+
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  cursor: pointer;
+
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+@media (hover: hover) {
+  .diaryCard:hover {
+    transform: scale(1.05);
+  }
+}
+
+.diaryCard > h3 {
+  font-size: 2rem;
+}
+
+.diaryCard > h4 {
+  text-align: right;
+  font-size: 1.8rem;
+}
+
+.diaryCard > p {
+  margin-bottom: 12px;
+
+  font-size: 1.3rem;
+}
+
+.todoList > h4 {
+  color: #757575;
+  font-size: 1.6rem;
+}
+
+.todoList > ul {
+  margin-top: 4px;
+
+  list-style: none;
+}
+
+.todoList li {
+  height: 18px;
+
+  display: flex;
+  align-items: center;
+
+  font-size: 1.4rem;
+}
+
+.todoList li:not(:last-child) {
+  margin-bottom: 2px;
+}
+
+.todoList span {
+  line-height: 18px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todoList svg {
+  width: 16px;
+  height: 16px;
+
+  margin-right: 4px;
+
+  fill: #ccc;
+}

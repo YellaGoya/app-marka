@@ -26,6 +26,7 @@
 
 .buttonSync > span {
   display: inline-block;
+  font-size: 1.8rem;
 }
 
 @media (hover: hover) {

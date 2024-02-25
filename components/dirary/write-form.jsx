@@ -143,7 +143,7 @@ const WriteForm = ({ diaryId, idx }) => {
       editorRef.current.emptyDiary();
 
       try {
-        const diaries = status === 'authenticated' ? await serverDB.readDiaries(0) : await clientDB.readDiaries(false);
+        const diaries = status === 'authenticated' ? await serverDB.readDiaries(0).then((res) => res.diaries) : await clientDB.readDiaries(false);
 
         setDiaries(diaries);
       } catch (error) {

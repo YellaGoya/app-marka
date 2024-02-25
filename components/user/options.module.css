@@ -1,9 +1,12 @@
 .sliderContainer {
   margin-top: 28px;
-  margin-bottom: 21px;
+  margin-bottom: 13px;
 }
 
 .code {
+  margin-top: 8px;
+  margin-right: 10px;
+  display: inline-block;
   padding: 1px 9px 2px 9px;
 
   color: var(--code-color);
@@ -19,8 +22,7 @@
 }
 
 .default {
-  margin-left: 18px;
-
+  margin-right: 0;
   color: #000000;
   background-color: #dddddd;
   cursor: pointer;

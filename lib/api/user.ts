@@ -2,7 +2,7 @@
 'use server';
 
 import useSQL from 'lib/api/connection-pool';
-import { User, SearchResult } from 'lib/type-def';
+import { User, FollowingPage, SearchResultPage } from 'lib/type-def';
 import { PoolClient } from 'pg';
 import { auth } from 'lib/auth';
 
@@ -21,26 +21,42 @@ const getUser = async (tag: string): Promise<User> => {
   return rows[0];
 };
 
-const getUsersByTag = async (tag: string): Promise<User[]> => {
+const getUsersByTag = async (tag: string, pageNumber: number): Promise<SearchResultPage> => {
+  const { id } = await getSessionUser();
+
+  const user_id = Number(id);
+  const limit = 15;
+  const offset = pageNumber * limit;
+
+  pageNumber++;
+
+  const { rows } = await useSQL((conn: PoolClient) => {
+    return conn.query(
+      'SELECT users.user_id, users.tag, users.email, COALESCE(following.following_id, 0) as following_id FROM users LEFT JOIN following ON users.user_id = following.user_to AND following.user_from = $1 WHERE users.tag LIKE $2 LIMIT $3 OFFSET $4',
+      [user_id, tag + '%', limit, offset],
+    );
+  });
+
+  return { result: rows, newPageNumber: rows.length ? pageNumber : pageNumber - 1 };
+};
+
+const getFollowingCount = async (): Promise<number> => {
   const { id } = await getSessionUser();
 
   const user_id = Number(id);
 
   const { rows } = await useSQL((conn: PoolClient) => {
-    return conn.query(
-      'SELECT users.user_id, users.tag, users.email, COALESCE(following.following_id, 0) as following_id FROM users LEFT JOIN following ON users.user_id = following.user_to AND following.user_from = $1 WHERE users.tag LIKE $2',
-      [user_id, tag + '%'],
-    );
+    return conn.query('SELECT COUNT(*) FROM following WHERE user_from = $1', [user_id]);
   });
 
-  return rows;
+  return rows[0].count;
 };
 
-const getFollowingList = async (pageNumber: number): Promise<SearchResult> => {
+const getFollowingList = async (pageNumber: number): Promise<FollowingPage> => {
   const { id } = await getSessionUser();
 
   const user_id = Number(id);
-  const limit = 10;
+  const limit = 15;
   const offset = pageNumber * limit;
 
   pageNumber++;
@@ -52,7 +68,7 @@ const getFollowingList = async (pageNumber: number): Promise<SearchResult> => {
     );
   });
 
-  return { following: rows, newPageNumber: pageNumber };
+  return { following: rows, newPageNumber: rows.length ? pageNumber : pageNumber - 1 };
 };
 
 const addFollowing = async (target_id: number): Promise<number> => {
@@ -110,7 +126,7 @@ const approveUser = async (list_id: number): Promise<any> => {
   const session = await auth();
   if (!session?.user) throw new Error('Authorization error: Unauthorized User.');
 
-  const { rows } = await useSQL(async (conn: PoolClient) => {
+  await useSQL(async (conn: PoolClient) => {
     try {
       await conn.query('BEGIN');
       // waiting 테이블에서 승인할 사용자의 정보를 가져온다.
@@ -135,8 +151,17 @@ const approveUser = async (list_id: number): Promise<any> => {
       throw new Error('Failed to approve user.');
     }
   });
-
-  return rows;
 };
 
-export { getUser, getUsersByTag, getFollowingList, addFollowing, deleteFollowing, checkUserByTag, checkUserByEmail, getWaitingList, approveUser };
+export {
+  getUser,
+  getUsersByTag,
+  getFollowingCount,
+  getFollowingList,
+  addFollowing,
+  deleteFollowing,
+  checkUserByTag,
+  checkUserByEmail,
+  getWaitingList,
+  approveUser,
+};

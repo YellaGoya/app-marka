@@ -138,7 +138,22 @@ const readDiaries = async (pageNumber: number) => {
     return conn.query('SELECT * FROM diaries WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3', [user_id, limit, offset]);
   });
 
-  return { diaries: rows, newPageNumber: pageNumber };
+  return { diaries: rows, newPageNumber: rows.length ? pageNumber : pageNumber - 1 };
 };
 
-export { addDiary, updateDiary, updateStatus, removeDiary, readDiary, readDiaries };
+const readFollowingDiaries = async () => {
+  const { id } = await getSessionUser();
+
+  const user_id = Number(id);
+
+  const { rows } = await useSQL(async (conn: PoolClient) => {
+    return conn.query(
+      'SELECT diaries.*, users.tag FROM diaries JOIN users ON diaries.user_id = users.user_id WHERE diaries.user_id IN ( SELECT following.user_to FROM following WHERE following.user_from = $1 ) AND diaries.is_secret = false ORDER BY diaries.created_at DESC;',
+      [user_id],
+    );
+  });
+
+  return rows;
+};
+
+export { addDiary, updateDiary, updateStatus, removeDiary, readDiary, readDiaries, readFollowingDiaries };

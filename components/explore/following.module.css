@@ -46,15 +46,10 @@
   }
 }
 
-.followingContainer {
-  position: absolute;
-  top: 10px;
-  z-index: 10;
-
-  width: fit-content;
-}
-
 .tagList {
+  max-height: 320px;
+
+  overflow-y: auto;
   list-style: none;
 }
 
@@ -73,7 +68,7 @@
 
 .tagList button {
   position: absolute;
-  right: 0;
+  right: 10px;
 
   top: 50%;
   transform: translateY(-50%);

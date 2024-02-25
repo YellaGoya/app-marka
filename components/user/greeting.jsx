@@ -14,8 +14,11 @@ import Button from 'components/common/button';
 import CloudSyncRoundedIcon from '@mui/icons-material/CloudSyncRounded';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import PlayCircleOutlineRoundedIcon from '@mui/icons-material/PlayCircleOutlineRounded';
 import css from './greeting.module.css';
 import global from 'app/global.module.css';
+
+import { test } from 'lib/action/user';
 
 const Greeting = () => {
   const { status } = useSession();
@@ -59,6 +62,17 @@ const Greeting = () => {
                 <span>태그 등록</span>
                 <ExitToAppRoundedIcon />
               </Button>
+              <Button
+                onClick={() => {
+                  try {
+                    test();
+                  } catch {
+                    console.log('what');
+                  }
+                }}
+              >
+                test!!
+              </Button>
             </span>
           </>
         ) : tab === 1 ? (
@@ -82,7 +96,7 @@ const Greeting = () => {
           />
         ) : tab === 3 ? (
           <>
-            <h1 className={global.title}>데이터베이스 연동이 완료되었습니다.</h1>
+            <h1 className={global.title}>데이터베이스 연동이 완료 되었습니다.</h1>
             <span className={css.buttonSyncWrapper}>
               <Button
                 className={css.buttonSync}
@@ -99,7 +113,18 @@ const Greeting = () => {
             </span>
           </>
         ) : tab === 4 ? (
-          <div>대기자 명단에 등록 완료</div>
+          <>
+            <h1 className={global.title}>태그 등록이 완료 되었습니다.</h1>
+            <Button
+              className={css.buttonSync}
+              onClick={() => {
+                setTab(0);
+              }}
+            >
+              <span>처음으로</span>
+              <PlayCircleOutlineRoundedIcon />
+            </Button>
+          </>
         ) : null}
       </div>
       <span className={clsx(global.poweredBy, { [global.loaded]: tab !== null })}>Powered by ahnsehyeok.</span>

@@ -53,10 +53,11 @@ const MyDiaries = () => {
 
     try {
       if (status === 'authenticated') {
-        const result = await serverDB.readDiaries(isLazy ? pageNumber : 0);
-        newDiaries = result.diaries;
+        // 글작성시에 새로고침 된 페이지는 pageNumber가 0이므로 1로 설정
+        const res = await serverDB.readDiaries(isLazy ? pageNumber || 1 : 0);
+        newDiaries = res.diaries;
 
-        setPageNumber(result.newPageNumber);
+        setPageNumber(res.newPageNumber);
       } else {
         newDiaries = await clientDB.readDiaries(isLazy);
       }

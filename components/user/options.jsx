@@ -51,7 +51,7 @@ const Options = () => {
         <span>에디터 마카</span>&nbsp;색상 변경
       </h1>
       <SliderPicker className={css.sliderContainer} color={color} onChange={handleChange} />
-      <code className={css.code}>(미리보기) 나랏말싸미 둥귁에 달아 ···</code>
+      <code className={css.code}>나랏말싸미 둥귁에 달아 ···</code>
       <code className={clsx(css.code, css.default)} onClick={backToDefault}>
         (기본) #dddddd
       </code>

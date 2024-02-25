@@ -37,7 +37,12 @@ export type Diary = {
   is_secret: boolean;
 };
 
-export type SearchResult = {
+export type FollowingPage = {
   following: Following[];
+  newPageNumber: number;
+};
+
+export type SearchResultPage = {
+  result: User[];
   newPageNumber: number;
 };

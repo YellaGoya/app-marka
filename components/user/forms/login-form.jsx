@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 
 import { authenticate } from 'lib/action/user';
 import Button from 'components/common/button';
