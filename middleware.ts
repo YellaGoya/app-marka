@@ -7,6 +7,7 @@ import { authConfig } from 'lib/auth.config';
 const store: Record<string, { count: number; timestamp: number; blockUntil: number }> = {};
 
 export const middleware = (req: NextRequest) => {
+  //
   let res = NextResponse.next();
 
   if (req.nextUrl.pathname.startsWith('/setting') && req.method === 'POST') {
