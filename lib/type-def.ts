@@ -46,3 +46,10 @@ export type SearchResultPage = {
   result: User[];
   newPageNumber: number;
 };
+
+export type History = {
+  diary_id?: number;
+  user_id?: number;
+  time: number;
+  action?: 'add' | 'update' | 'remove';
+};

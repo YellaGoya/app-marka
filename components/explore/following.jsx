@@ -105,6 +105,7 @@ const Following = () => {
 };
 
 const FollowingList = ({ refreshFollowingCount, followingListRef }) => {
+  const { status } = useSession();
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [following, setFollowing] = useState([]);
@@ -126,7 +127,7 @@ const FollowingList = ({ refreshFollowingCount, followingListRef }) => {
   );
 
   useEffect(() => {
-    getFollowing();
+    if (status === 'authenticated') getFollowing();
   }, [status]);
 
   const getFollowing = async () => {
@@ -135,9 +136,7 @@ const FollowingList = ({ refreshFollowingCount, followingListRef }) => {
 
       setFollowing((prevFollowing) => (followingPageNumber ? [...prevFollowing, ...res.following] : res.following));
 
-      if (followingPageNumber === 0) {
-        setIsLoaded(true);
-      }
+      if (!followingPageNumber) setIsLoaded(true);
 
       setFollowingPageNumber(res.newPageNumber);
     } catch {}
@@ -208,7 +207,7 @@ const SearchResultList = ({ text, refreshFollowingCount, searchListRef }) => {
       });
       if (node) observer.current.observe(node);
     },
-    [status, searchPageNumber],
+    [searchPageNumber],
   );
 
   useEffect(() => {
@@ -228,9 +227,7 @@ const SearchResultList = ({ text, refreshFollowingCount, searchListRef }) => {
 
       setSearchResult((prevSearchResult) => (searchPageNumber ? [...prevSearchResult, ...res.result] : res.result));
 
-      if (searchPageNumber === 0) {
-        setIsLoaded(true);
-      }
+      if (!searchPageNumber) setIsLoaded(true);
 
       setSearchPageNumber(res.newPageNumber);
     } catch {}

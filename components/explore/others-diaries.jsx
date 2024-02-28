@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
+import { useSession } from 'next-auth/react';
+import clsx from 'clsx';
 
 import { followingCountState } from 'lib/recoil';
 import { readFollowingDiaries } from 'lib/api/diary';
@@ -13,19 +15,44 @@ import * as css from './others-diaries.module.css';
 const dayArray = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
 
 const OthersDiaries = () => {
+  const { status } = useSession();
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const followingCount = useRecoilValue(followingCountState);
 
   const [diaries, setDiaries] = useState([]);
+  const [diariesPageNumber, setDiariesPageNumber] = useState(0);
+
+  const observer = useRef();
+
+  const lastDiaryRef = useCallback(
+    (node) => {
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          getDiaries();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [status, diariesPageNumber],
+  );
 
   useEffect(() => {
-    if (followingCount) getDiaries();
-  }, [followingCount]);
+    if (status === 'authenticated' && followingCount) getDiaries();
+  }, [status, followingCount]);
 
   const getDiaries = async () => {
-    const res = await readFollowingDiaries();
-    setDiaries(res);
+    try {
+      const res = await readFollowingDiaries(diariesPageNumber);
 
-    console.log(res);
+      console.log(res);
+      setDiaries((prevDiaries) => (diariesPageNumber ? [...prevDiaries, ...res.diaries] : res.diaries));
+
+      if (!diariesPageNumber) setIsLoaded(true);
+
+      setDiariesPageNumber(res.newPageNumber);
+    } catch {}
   };
 
   const getKoreanDay = (idx) => {
@@ -33,23 +60,21 @@ const OthersDiaries = () => {
   };
 
   return (
-    <section className={css.cardContainer}>
+    <section className={clsx(css.cardContainer, { [global.loaded]: isLoaded })}>
       {diaries.length !== 0 &&
-        diaries.map((diary) => {
+        diaries.map((diary, idx) => {
           const createAt = new Date(diary.created_at);
           // createAt 의 요일을 한글로
           const day = createAt.getDay();
           const createAtDay = getKoreanDay(day);
 
-          const todoList = {
-            extracted: diary.extracted_todos,
-            manual: diary.manual_todos,
-          };
           return (
-            <div key={diary.diary_id} className={css.diaryCard}>
+            <div key={diary.diary_id} ref={diaries.length - 1 === idx ? lastDiaryRef : null} className={css.diaryCard}>
               <h3>{diary.title}</h3>
-              <p>{createAtDay}</p>
+              <span style={{ backgroundColor: (day === 0 || day === 6) && '#ffd8d8' }}>{createAtDay}</span>
+
               <h4>{diary.tag}</h4>
+              <p>({diary.email})</p>
               <TodoList extracted={diary.extracted_todos} manual={diary.manual_todos} />
             </div>
           );

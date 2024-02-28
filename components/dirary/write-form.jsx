@@ -33,8 +33,7 @@ const WriteForm = ({ diaryId, idx }) => {
 
   const [diaryTitle, setDiaryTitle] = useState('');
   const [todoList, setTodoList] = useState({ extracted: new Map(), manual: new Map() });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isSecret, setIsSecret] = useState(false);
+
   const [slateIsEmpty, setSlateIsEmpty] = useState(!onEdit);
   const [diary, setDiary] = useState(null);
   const [keyNumber, setKeyNumber] = useState(0);
@@ -116,8 +115,10 @@ const WriteForm = ({ diaryId, idx }) => {
       manual_todos: manual,
       created_at: onEdit ? diary.created_at : time,
       updated_at: time,
-      is_secret: isSecret,
+      is_secret: extracted.length === 0 && manual.length === 0,
     };
+
+    if (onEdit && status === 'authenticated') newDiary.diary_id = Number(newDiary.diary_id.slice(-13));
 
     const onUpdateDiary = () => {
       setDiaries((prevDiaries) => {
@@ -154,11 +155,12 @@ const WriteForm = ({ diaryId, idx }) => {
     const action = onEdit ? 'updateDiary' : 'addDiary';
     const handler = onEdit ? onUpdateDiary : onAddDiary;
 
-    if (onEdit && status === 'authenticated') newDiary.diary_id = Number(newDiary.diary_id.slice(-13));
-
     try {
-      if (status === 'authenticated') await serverDB[action](newDiary);
-      await clientDB[action](newDiary);
+      if (status === 'authenticated') {
+        await serverDB[action](newDiary, timestamp);
+      }
+
+      await clientDB[action](newDiary, timestamp);
 
       handler();
     } catch (error) {

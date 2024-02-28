@@ -1,12 +1,16 @@
 .cardContainer {
-  /* 내부 컨텐츠를 수평 최대 3개 */
   margin-top: 24px;
-  /* display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 40px; */
 
   column-count: 3;
   column-gap: 40px;
+
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  pointer-events: none;
 }
 
 @media (max-width: 950px) {
@@ -33,8 +37,6 @@
 
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  cursor: pointer;
-
   -webkit-column-break-inside: avoid;
   page-break-inside: avoid;
   break-inside: avoid;
@@ -56,9 +58,19 @@
 }
 
 .diaryCard > p {
+  text-align: right;
+
+  font-size: 1.3rem;
+  font-weight: lighter;
+}
+
+.diaryCard > span {
+  padding: 3px 4px 2px 4px;
   margin-bottom: 12px;
 
   font-size: 1.3rem;
+  background-color: #e5e5e5;
+  border-radius: 5px;
 }
 
 .todoList > h4 {

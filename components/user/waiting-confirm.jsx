@@ -25,7 +25,6 @@ const WaitingConfirm = () => {
   return (
     isAdmin && (
       <section>
-        confirm list
         <ul>
           {waitingList &&
             waitingList.map((user) => {

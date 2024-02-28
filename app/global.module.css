@@ -32,7 +32,11 @@
     rgba(17, 17, 26, 0.08) 0px 16px 40px;
 
   opacity: 0;
-  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  visibility: hidden;
+  transition:
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
   pointer-events: none;
 }
 
@@ -57,6 +61,7 @@
 
 .loaded {
   opacity: 1 !important;
+  visibility: visible !important;
   pointer-events: auto !important;
 }
 

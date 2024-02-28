@@ -5,6 +5,7 @@ import { useRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
 
+import { getServerTime } from 'lib/api/time';
 import * as clientDB from 'lib/indexed-db';
 import * as serverDB from 'lib/api/diary';
 import { diariesState, onEditDiaryIdState } from 'lib/recoil';
@@ -63,17 +64,34 @@ const MyDiaries = () => {
       }
 
       setDiaries((prevDiaries) => (isLazy ? [...prevDiaries, ...newDiaries] : newDiaries));
-      setIsLoaded(true);
+
+      if (!isLazy) setIsLoaded(true);
     } catch {}
   };
 
   const removeDiary = useCallback(
     async (diaryId, idx) => {
-      if (status === 'authenticated') diaryId = Number(diaryId.slice(-13));
+      let time;
+      let timestamp;
 
       try {
-        if (status === 'authenticated') await serverDB.removeDiary(diaryId);
-        await clientDB.removeDiary(diaryId);
+        time = await getServerTime();
+        timestamp = new Date(time).getTime();
+      } catch (error) {
+        const date = new Date();
+
+        time = date.toISOString();
+        timestamp = date.getTime();
+      }
+
+      try {
+        if (status === 'authenticated') {
+          diaryId = Number(diaryId.slice(-13));
+
+          await serverDB.removeDiary(diaryId, timestamp);
+        }
+
+        await clientDB.removeDiary(diaryId, timestamp);
 
         setDiaries((prevDiaries) => prevDiaries.filter((_, index) => index !== idx));
       } catch (error) {

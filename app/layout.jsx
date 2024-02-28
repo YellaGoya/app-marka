@@ -5,6 +5,7 @@ import AuthProvider from 'contexts/auth-provider';
 
 import 'app/global.css';
 import global from 'app/global.module.css';
+import SyncChecker from 'components/common/syncChecker';
 
 export const metadata = {
   title: 'Marka',
@@ -19,7 +20,10 @@ const RootLayout = ({ children }) => {
         <AuthProvider>
           <RecoilProvider>
             <Header />
-            <main className={global.main}>{children}</main>
+            <main className={global.main}>
+              {children}
+              <SyncChecker />
+            </main>
           </RecoilProvider>
         </AuthProvider>
       </body>
