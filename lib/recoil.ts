@@ -19,3 +19,13 @@ export const followingCountState = atom({
   key: 'followingCountState',
   default: '',
 });
+
+export const isSyncedState = atom({
+  key: 'isSyncedState',
+  default: false,
+});
+
+export const errorState = atom({
+  key: 'errorState',
+  default: null,
+});

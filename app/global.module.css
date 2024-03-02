@@ -93,3 +93,44 @@
 .title > span {
   color: #000;
 }
+
+.enter {
+  opacity: 0;
+}
+.enterAcitive {
+  opacity: 1;
+  transition: opacity 300ms;
+}
+.exit {
+  opacity: 1;
+}
+.exitActive {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+.textButton > svg {
+  width: 24px;
+  height: 24px;
+  fill: #757575;
+}
+
+.textButton > span {
+  display: inline-block;
+  font-size: 1.8rem;
+}
+
+@media (hover: hover) {
+  .textButton:hover > svg {
+    fill: #000;
+  }
+
+  .textButton > span {
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .textButton:hover > span {
+    border-color: #000;
+  }
+}

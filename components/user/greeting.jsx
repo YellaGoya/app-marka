@@ -43,9 +43,9 @@ const Greeting = () => {
             <h1 className={global.title}>
               <span>기존 데이터</span>를 연동할 수 있습니다.
             </h1>
-            <span className={css.buttonSyncWrapper}>
+            <span className={global.textButtonWrapper}>
               <Button
-                className={css.buttonSync}
+                className={global.textButton}
                 onClick={() => {
                   setTab(1);
                 }}
@@ -54,7 +54,7 @@ const Greeting = () => {
                 <CloudSyncRoundedIcon />
               </Button>
               <Button
-                className={css.buttonSync}
+                className={global.textButton}
                 onClick={() => {
                   setTab(2);
                 }}
@@ -97,9 +97,9 @@ const Greeting = () => {
         ) : tab === 3 ? (
           <>
             <h1 className={global.title}>데이터베이스 연동이 완료 되었습니다.</h1>
-            <span className={css.buttonSyncWrapper}>
+            <span className={global.textButtonWrapper}>
               <Button
-                className={css.buttonSync}
+                className={global.textButton}
                 onClick={() => {
                   signOut({ redirect: false }).then(() => {
                     setTab(0);
@@ -116,7 +116,7 @@ const Greeting = () => {
           <>
             <h1 className={global.title}>태그 등록이 완료 되었습니다.</h1>
             <Button
-              className={css.buttonSync}
+              className={global.textButton}
               onClick={() => {
                 setTab(0);
               }}

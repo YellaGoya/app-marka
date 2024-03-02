@@ -9,7 +9,7 @@ let cursorKey: IDBValidKey | undefined;
 const initDB = async (): Promise<IDBPDatabase> => {
   if (dbInstance) return dbInstance;
 
-  dbInstance = await openDB('AppMarka', 20, {
+  dbInstance = await openDB('AppMarka', 21, {
     upgrade(db) {
       if (db.objectStoreNames.contains('diaries')) {
         db.deleteObjectStore('diaries');

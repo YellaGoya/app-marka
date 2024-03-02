@@ -1,0 +1,22 @@
+.syncProcessContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 1.8rem;
+  font-weight: bold;
+  opacity: 0;
+
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.show {
+  opacity: 0.65;
+}

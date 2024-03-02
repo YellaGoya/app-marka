@@ -46,7 +46,6 @@ const OthersDiaries = () => {
     try {
       const res = await readFollowingDiaries(diariesPageNumber);
 
-      console.log(res);
       setDiaries((prevDiaries) => (diariesPageNumber ? [...prevDiaries, ...res.diaries] : res.diaries));
 
       if (!diariesPageNumber) setIsLoaded(true);

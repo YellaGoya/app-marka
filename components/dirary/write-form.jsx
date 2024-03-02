@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
 
 import { getServerTime } from 'lib/api/time';
-import { diariesState, onEditDiaryIdState } from 'lib/recoil';
+import { diariesState, onEditDiaryIdState, errorState } from 'lib/recoil';
 import * as clientDB from 'lib/indexed-db';
 import * as serverDB from 'lib/api/diary';
 
@@ -40,6 +40,7 @@ const WriteForm = ({ diaryId, idx }) => {
 
   const setDiaries = useSetRecoilState(diariesState);
   const setOnEditDiaryID = useSetRecoilState(onEditDiaryIdState);
+  const setError = useSetRecoilState(errorState);
 
   useEffect(() => {
     let time;
@@ -69,7 +70,7 @@ const WriteForm = ({ diaryId, idx }) => {
 
   const loadDiary = async () => {
     try {
-      const prevDiary = status === 'authenticated' ? await serverDB.readDiary(diaryId) : await clientDB.readDiary(diaryId);
+      const prevDiary = status === 'authenticated' ? await serverDB.readDiary(Number(diaryId.slice(-13))) : await clientDB.readDiary(diaryId);
 
       const { title, extracted_todos, manual_todos } = prevDiary;
       const lastTodoKeyNumber = manual_todos.length !== 0 ? Number(manual_todos[manual_todos.length - 1][0].slice(7)) : -1;
@@ -81,7 +82,8 @@ const WriteForm = ({ diaryId, idx }) => {
 
       setIsLoaded(true);
     } catch (error) {
-      console.error(`Failed to fetch diary: ${error}`);
+      setError('일기를 불러오는 중 오류가 발생했습니다.');
+      setOnEditDiaryID(null);
     }
   };
 
@@ -119,6 +121,9 @@ const WriteForm = ({ diaryId, idx }) => {
     };
 
     if (onEdit && status === 'authenticated') newDiary.diary_id = Number(newDiary.diary_id.slice(-13));
+
+    // console.log(newDiary);
+    // return;
 
     const onUpdateDiary = () => {
       setDiaries((prevDiaries) => {
