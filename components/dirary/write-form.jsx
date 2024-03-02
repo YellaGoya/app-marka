@@ -82,7 +82,7 @@ const WriteForm = ({ diaryId, idx }) => {
 
       setIsLoaded(true);
     } catch (error) {
-      setError('일기를 불러오는 중 오류가 발생했습니다.');
+      setError(<h4>다이어리를 불러오는 중 오류가 발생했습니다.</h4>);
       setOnEditDiaryID(null);
     }
   };
@@ -169,7 +169,7 @@ const WriteForm = ({ diaryId, idx }) => {
 
       handler();
     } catch (error) {
-      console.error(error.message);
+      setError(<h4>다이어리를 저장하는 중 오류가 발생했습니다.</h4>);
     }
   };
 

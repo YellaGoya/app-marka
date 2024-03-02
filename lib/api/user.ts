@@ -53,6 +53,7 @@ const getFollowingCount = async (): Promise<number> => {
 };
 
 const getFollowingList = async (pageNumber: number): Promise<FollowingPage> => {
+  throw new Error('Not implemented yet.');
   const { id } = await getSessionUser();
 
   const user_id = Number(id);

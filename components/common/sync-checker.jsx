@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import clsx from 'clsx';
 
+import { errorState } from 'lib/recoil';
 import { isSyncedState } from 'lib/recoil';
 
 import * as clientDB from 'lib/indexed-db';
@@ -18,6 +19,8 @@ const SyncChecker = () => {
   const [syncProcessing, setSyncProcessing] = useState(false);
   const [syncTransition, setSyncTransition] = useState(false);
 
+  const setError = useSetRecoilState(errorState);
+
   useEffect(() => {
     if (status === 'authenticated' && !isSynced) sync();
   }, [status, isSynced]);
@@ -26,45 +29,45 @@ const SyncChecker = () => {
     setSyncProcessing(true);
     setSyncTransition(true);
 
-    const clientHistories = await clientDB.getHistories();
-    const serverHistories = await serverDB.getHistories();
-
-    const clientHistoriesMap = clientHistories.reduce((map, history) => {
-      map[history.diary_id] = history;
-      return map;
-    }, {});
-    const serverHistoriesMap = serverHistories.reduce((map, history) => {
-      history.diary_id = Number(history.diary_id.slice(-13));
-      map[history.diary_id] = history;
-      return map;
-    }, {});
-
-    const needs = {
-      server: [],
-      client: [],
-    };
-
-    clientHistories.forEach((clientHistory) => {
-      const serverHistory = serverHistoriesMap[clientHistory.diary_id];
-
-      if (!serverHistory) needs.server.push(clientHistory);
-      else if (Number(clientHistory.time) > Number(serverHistory.time)) {
-        if (clientHistory.action === 'update') needs.server.push(clientHistory);
-        else needs.server.push(clientHistory);
-      }
-    });
-
-    serverHistories.forEach((serverHistory) => {
-      const clientHistory = clientHistoriesMap[serverHistory.diary_id];
-
-      if (!clientHistory) needs.client.push(serverHistory);
-      else if (Number(serverHistory.time) > Number(clientHistory.time)) {
-        if (serverHistory.action === 'update') needs.client.push(serverHistory);
-        else needs.client.push(serverHistory);
-      }
-    });
-
     try {
+      const clientHistories = await clientDB.getHistories();
+      const serverHistories = await serverDB.getHistories();
+
+      const clientHistoriesMap = clientHistories.reduce((map, history) => {
+        map[history.diary_id] = history;
+        return map;
+      }, {});
+      const serverHistoriesMap = serverHistories.reduce((map, history) => {
+        history.diary_id = Number(history.diary_id.slice(-13));
+        map[history.diary_id] = history;
+        return map;
+      }, {});
+
+      const needs = {
+        server: [],
+        client: [],
+      };
+
+      clientHistories.forEach((clientHistory) => {
+        const serverHistory = serverHistoriesMap[clientHistory.diary_id];
+
+        if (!serverHistory) needs.server.push(clientHistory);
+        else if (Number(clientHistory.time) > Number(serverHistory.time)) {
+          if (clientHistory.action === 'update') needs.server.push(clientHistory);
+          else needs.server.push(clientHistory);
+        }
+      });
+
+      serverHistories.forEach((serverHistory) => {
+        const clientHistory = clientHistoriesMap[serverHistory.diary_id];
+
+        if (!clientHistory) needs.client.push(serverHistory);
+        else if (Number(serverHistory.time) > Number(clientHistory.time)) {
+          if (serverHistory.action === 'update') needs.client.push(serverHistory);
+          else needs.client.push(serverHistory);
+        }
+      });
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for (const [_, histories] of Object.entries(needs)) {
         for (const history of histories) {
@@ -75,7 +78,13 @@ const SyncChecker = () => {
       setIsSynced(true);
     } catch {
       // 될때까지 시도
-      sync();
+      setError(
+        <h4>
+          동기화 중 오류가 발생했습니다.
+          <br />
+          새로 고침이 필요합니다.
+        </h4>,
+      );
     }
 
     setSyncTransition(false);

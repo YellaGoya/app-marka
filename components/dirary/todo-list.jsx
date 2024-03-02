@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSetRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
 import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
@@ -8,6 +9,8 @@ import clsx from 'clsx';
 import { getServerTime } from 'lib/api/time';
 import * as clientDB from 'lib/indexed-db';
 import * as serverDB from 'lib/api/diary';
+import { errorState } from 'lib/recoil';
+
 import Button from 'components/common/button';
 
 import JoinFullOutlinedIcon from '@mui/icons-material/JoinFullOutlined';
@@ -69,6 +72,8 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
   const [todoTitle, setTodoTitle] = useState(todo[1].text);
 
   const titleRef = useRef(null);
+
+  const setError = useSetRecoilState(errorState);
 
   useEffect(() => {
     if (isEditing) {
@@ -154,7 +159,7 @@ const TodoItem = ({ todo, place = 'extracted', setTodoList, isWrite, diaryId }) 
         };
       });
     } catch {
-      // DB가 수정되지 않으면 아무런 변화가 없도록
+      setError(<h4>투두리스트 상태 변경 중 문제가 발생했습니다.</h4>);
     }
   };
 

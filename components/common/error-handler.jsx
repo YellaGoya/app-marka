@@ -5,6 +5,8 @@ import { errorState } from 'lib/recoil';
 
 import Button from 'components/common/button';
 
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+
 import * as global from 'app/global.module.css';
 import * as css from './error-handler.module.css';
 
@@ -13,7 +15,7 @@ const ErrorHandler = () => {
   return (
     error && (
       <div className={css.errorHandlerContainer}>
-        <h4>{error}</h4>
+        {error}
         <Button
           className={global.textButton}
           onClick={() => {
@@ -21,6 +23,7 @@ const ErrorHandler = () => {
           }}
         >
           <span>닫기</span>
+          <KeyboardBackspaceRoundedIcon />
         </Button>
       </div>
     )

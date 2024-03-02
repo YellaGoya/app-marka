@@ -179,7 +179,6 @@ const removeDiary = async (diary_id: number | string, time: number) => {
 };
 
 const readDiary = async (diary_id: string) => {
-  throw new Error('Not implemented yet.');
   const { id } = await getSessionUser();
 
   const user_id = Number(id);

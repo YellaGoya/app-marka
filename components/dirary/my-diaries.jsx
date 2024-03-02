@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback, memo } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
 
 import { getServerTime } from 'lib/api/time';
 import * as clientDB from 'lib/indexed-db';
 import * as serverDB from 'lib/api/diary';
-import { diariesState, onEditDiaryIdState } from 'lib/recoil';
+import { diariesState, onEditDiaryIdState, errorState } from 'lib/recoil';
 
 import WriteForm from 'components/dirary/write-form';
 import TodoList from 'components/dirary/todo-list';
@@ -28,6 +28,8 @@ const MyDiaries = () => {
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [pageNumber, setPageNumber] = useState(0);
+
+  const setError = useSetRecoilState(errorState);
 
   useEffect(() => {
     if (status !== 'loading') getMyDiaries({ isLazy: false });
@@ -66,7 +68,9 @@ const MyDiaries = () => {
       setDiaries((prevDiaries) => (isLazy ? [...prevDiaries, ...newDiaries] : newDiaries));
 
       if (!isLazy) setIsLoaded(true);
-    } catch {}
+    } catch {
+      setError(<h4>다이어리 목록을 불러오는 중 문제가 발생했습니다.</h4>);
+    }
   };
 
   const removeDiary = useCallback(
@@ -77,7 +81,7 @@ const MyDiaries = () => {
       try {
         time = await getServerTime();
         timestamp = new Date(time).getTime();
-      } catch (error) {
+      } catch {
         const date = new Date();
 
         time = date.toISOString();
@@ -95,7 +99,7 @@ const MyDiaries = () => {
 
         setDiaries((prevDiaries) => prevDiaries.filter((_, index) => index !== idx));
       } catch (error) {
-        console.error(`Failed to remove diary: ${error}`);
+        setError(<h4>다이어리 제거 중 문제가 발생했습니다.</h4>);
       }
     },
     [status],

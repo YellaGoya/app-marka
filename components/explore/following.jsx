@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
 
-import { followingCountState } from 'lib/recoil';
+import { followingCountState, errorState } from 'lib/recoil';
 import { getUsersByTag, getFollowingCount, getFollowingList, addFollowing, deleteFollowing } from 'lib/api/user';
 
 import Button from 'components/common/button';
@@ -35,12 +35,12 @@ const Following = () => {
   const searchButtonRef = useRef(null);
   const searchListRef = useRef(null);
 
+  const setError = useSetRecoilState(errorState);
+
   useEffect(() => {
     if (status === 'authenticated') {
-      try {
-        refreshFollowingCount();
-        setIsLoaded(true);
-      } catch {}
+      refreshFollowingCount();
+      setIsLoaded(true);
     }
   }, [status]);
 
@@ -63,7 +63,9 @@ const Following = () => {
   const refreshFollowingCount = async () => {
     try {
       setFollowingCount(await getFollowingCount());
-    } catch {}
+    } catch {
+      setError('팔로잉 목록을 불러오는 중 문제가 발생했습니다.');
+    }
   };
 
   const toggleFollowingHandler = () => {
@@ -111,6 +113,8 @@ const FollowingList = ({ refreshFollowingCount, followingListRef }) => {
   const [following, setFollowing] = useState([]);
   const [followingPageNumber, setFollowingPageNumber] = useState(0);
 
+  const setError = useSetRecoilState(errorState);
+
   const observer = useRef();
 
   const lastFollowingRef = useCallback(
@@ -139,7 +143,9 @@ const FollowingList = ({ refreshFollowingCount, followingListRef }) => {
       if (!followingPageNumber) setIsLoaded(true);
 
       setFollowingPageNumber(res.newPageNumber);
-    } catch {}
+    } catch {
+      setError('팔로잉 목록을 불러오는 중 문제가 발생했습니다.');
+    }
   };
 
   const unFollowHandler = async (followingId) => {
@@ -150,7 +156,9 @@ const FollowingList = ({ refreshFollowingCount, followingListRef }) => {
       });
 
       refreshFollowingCount();
-    } catch {}
+    } catch {
+      setError('팔로우를 취소하는 중 문제가 발생했습니다.');
+    }
   };
 
   return (
@@ -197,6 +205,8 @@ const SearchResultList = ({ text, refreshFollowingCount, searchListRef }) => {
 
   const observer = useRef();
 
+  const setError = useSetRecoilState(errorState);
+
   const lastSearchRef = useCallback(
     (node) => {
       if (observer.current) observer.current.disconnect();
@@ -230,7 +240,9 @@ const SearchResultList = ({ text, refreshFollowingCount, searchListRef }) => {
       if (!searchPageNumber) setIsLoaded(true);
 
       setSearchPageNumber(res.newPageNumber);
-    } catch {}
+    } catch {
+      setError('검색 결과를 불러오는 중 문제가 발생했습니다.');
+    }
   };
 
   const toggleFollowingHandler = async (idx) => {
@@ -249,7 +261,9 @@ const SearchResultList = ({ text, refreshFollowingCount, searchListRef }) => {
       });
 
       refreshFollowingCount();
-    } catch {}
+    } catch {
+      setError('팔로우를 변경하는 중 문제가 발생했습니다.');
+    }
   };
 
   return (

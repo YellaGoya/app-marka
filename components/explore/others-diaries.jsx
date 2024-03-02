@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { useSession } from 'next-auth/react';
 import clsx from 'clsx';
 
-import { followingCountState } from 'lib/recoil';
+import { followingCountState, errorState } from 'lib/recoil';
 import { readFollowingDiaries } from 'lib/api/diary';
 
 import JoinFullOutlinedIcon from '@mui/icons-material/JoinFullOutlined';
@@ -24,6 +24,8 @@ const OthersDiaries = () => {
   const [diariesPageNumber, setDiariesPageNumber] = useState(0);
 
   const observer = useRef();
+
+  const setError = useSetRecoilState(errorState);
 
   const lastDiaryRef = useCallback(
     (node) => {
@@ -51,7 +53,9 @@ const OthersDiaries = () => {
       if (!diariesPageNumber) setIsLoaded(true);
 
       setDiariesPageNumber(res.newPageNumber);
-    } catch {}
+    } catch {
+      setError('다른 사용자의 다이어리를 불러오는 중 문제가 발생했습니다.');
+    }
   };
 
   const getKoreanDay = (idx) => {
