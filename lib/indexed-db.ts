@@ -107,16 +107,21 @@ const readDiary = async (diary_id: number): Promise<Diary | undefined> => {
   }, 'readwrite');
 };
 
-const readDiaries = async (isLazy: boolean): Promise<Diary[]> => {
+const readDiaries = async (isLazy: boolean): Promise<Diary[] | null> => {
   return useTransaction(async (tx: any) => {
     const index = tx.objectStore('diaries').index('created_at_index');
 
     let cursor;
-    if (isLazy) {
-      const keyRange = IDBKeyRange.upperBound(cursorKey);
-      cursor = await index.openCursor(keyRange, 'prev');
-    } else {
-      cursor = await index.openCursor(null, 'prev');
+
+    try {
+      if (isLazy) {
+        const keyRange = IDBKeyRange.upperBound(cursorKey);
+        cursor = await index.openCursor(keyRange, 'prev');
+      } else {
+        cursor = await index.openCursor(null, 'prev');
+      }
+    } catch {
+      return null;
     }
 
     const list: Diary[] = [];

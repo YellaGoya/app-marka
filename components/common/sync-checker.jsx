@@ -76,8 +76,8 @@ const SyncChecker = () => {
       }
 
       setIsSynced(true);
-    } catch {
-      // 될때까지 시도
+    } catch (error) {
+      console.error(error);
       setError(
         <h4>
           동기화 중 오류가 발생했습니다.

@@ -134,3 +134,28 @@
     border-color: #000;
   }
 }
+
+.emptyDiaryContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 100px 0;
+
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emptyDiaryContainer > h2 {
+  font-size: 2rem;
+}
+
+.emptyDiaryContainer > p {
+  font-family: "Malgun Gothic";
+  margin-top: 8px;
+  font-size: 1.6rem;
+}

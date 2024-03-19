@@ -30,6 +30,7 @@
 }
 
 .buttonContainer {
+  height: 31px;
   display: flex;
   align-items: center;
 
@@ -46,18 +47,21 @@
 }
 
 .buttonContainer > button:first-child {
-  margin-top: -1px;
   margin-right: 30px;
 }
 
 .buttonContainer > button:nth-last-child(2) {
-  margin-top: -1px;
   margin-right: 8px;
 }
 
 .buttonContainer > button:nth-last-child(2) > svg {
   width: 3.1rem;
   height: 3.1rem;
+}
+
+.buttonContainer > button:last-child > svg {
+  width: 2.7rem;
+  height: 2.7rem;
 }
 
 .editContainer {

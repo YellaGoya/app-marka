@@ -18,8 +18,6 @@ import PlayCircleOutlineRoundedIcon from '@mui/icons-material/PlayCircleOutlineR
 import css from './greeting.module.css';
 import global from 'app/global.module.css';
 
-import { test } from 'lib/action/user';
-
 const Greeting = () => {
   const { status } = useSession();
 
@@ -43,7 +41,7 @@ const Greeting = () => {
             <h1 className={global.title}>
               <span>기존 데이터</span>를 연동할 수 있습니다.
             </h1>
-            <span className={global.textButtonWrapper}>
+            <span className={css.buttonWrapper}>
               <Button
                 className={global.textButton}
                 onClick={() => {
@@ -61,17 +59,6 @@ const Greeting = () => {
               >
                 <span>태그 등록</span>
                 <ExitToAppRoundedIcon />
-              </Button>
-              <Button
-                onClick={() => {
-                  try {
-                    test();
-                  } catch {
-                    console.log('what');
-                  }
-                }}
-              >
-                test!!
               </Button>
             </span>
           </>
@@ -97,7 +84,7 @@ const Greeting = () => {
         ) : tab === 3 ? (
           <>
             <h1 className={global.title}>데이터베이스 연동이 완료 되었습니다.</h1>
-            <span className={global.textButtonWrapper}>
+            <span className={css.buttonWrapper}>
               <Button
                 className={global.textButton}
                 onClick={() => {
@@ -114,7 +101,8 @@ const Greeting = () => {
           </>
         ) : tab === 4 ? (
           <>
-            <h1 className={global.title}>태그 등록이 완료 되었습니다.</h1>
+            <h1 className={global.title}>태그 신청이 완료 되었습니다.</h1>
+            <p style={{ fontSize: '14px', marginTop: '-20px', marginBottom: '20px' }}>* 관리자의 승인 후 이용 가능.</p>
             <Button
               className={global.textButton}
               onClick={() => {

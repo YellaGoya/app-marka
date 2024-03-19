@@ -65,6 +65,8 @@ const MyDiaries = () => {
         newDiaries = await clientDB.readDiaries(isLazy);
       }
 
+      if (!newDiaries) return;
+
       setDiaries((prevDiaries) => (isLazy ? [...prevDiaries, ...newDiaries] : newDiaries));
 
       if (!isLazy) setIsLoaded(true);
@@ -105,23 +107,27 @@ const MyDiaries = () => {
     [status],
   );
 
-  return (
+  return diaries && diaries.length > 0 ? (
     <section className={clsx(css.diariesContainer, { [global.loaded]: isLoaded })}>
-      {diaries &&
-        diaries.map((diary, idx) => {
-          return (
-            <Diary
-              key={diary.diary_id}
-              lastDiaryRef={diaries.length - 1 === idx ? lastDiaryRef : null}
-              diary={diary}
-              idx={idx}
-              removeDiary={removeDiary}
-              setOnEditDiaryID={setOnEditDiaryID}
-              onEditDiaryID={onEditDiaryID}
-            />
-          );
-        })}
+      {diaries.map((diary, idx) => {
+        return (
+          <Diary
+            key={diary.diary_id}
+            lastDiaryRef={diaries.length - 1 === idx ? lastDiaryRef : null}
+            diary={diary}
+            idx={idx}
+            removeDiary={removeDiary}
+            setOnEditDiaryID={setOnEditDiaryID}
+            onEditDiaryID={onEditDiaryID}
+          />
+        );
+      })}
     </section>
+  ) : (
+    <article className={clsx(global.emptyDiaryContainer, { [global.loaded]: isLoaded })}>
+      <h2>새로운 다이어리를 추가해 보세요.</h2>
+      <p>Marka를 사용해 볼 좋은 기회입니다.</p>
+    </article>
   );
 };
 

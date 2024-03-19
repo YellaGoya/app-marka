@@ -62,27 +62,31 @@ const OthersDiaries = () => {
     return dayArray[idx];
   };
 
-  return (
+  return diaries.length > 0 ? (
     <section className={clsx(css.cardContainer, { [global.loaded]: isLoaded })}>
-      {diaries.length !== 0 &&
-        diaries.map((diary, idx) => {
-          const createAt = new Date(diary.created_at);
-          // createAt 의 요일을 한글로
-          const day = createAt.getDay();
-          const createAtDay = getKoreanDay(day);
+      {diaries.map((diary, idx) => {
+        const createAt = new Date(diary.created_at);
+        // createAt 의 요일을 한글로
+        const day = createAt.getDay();
+        const createAtDay = getKoreanDay(day);
 
-          return (
-            <div key={diary.diary_id} ref={diaries.length - 1 === idx ? lastDiaryRef : null} className={css.diaryCard}>
-              <h3>{diary.title}</h3>
-              <span style={{ backgroundColor: (day === 0 || day === 6) && '#ffd8d8' }}>{createAtDay}</span>
+        return (
+          <div key={diary.diary_id} ref={diaries.length - 1 === idx ? lastDiaryRef : null} className={css.diaryCard}>
+            <h3>{diary.title}</h3>
+            <span style={{ backgroundColor: (day === 0 || day === 6) && '#ffd8d8' }}>{createAtDay}</span>
 
-              <h4>{diary.tag}</h4>
-              <p>({diary.email})</p>
-              <TodoList extracted={diary.extracted_todos} manual={diary.manual_todos} />
-            </div>
-          );
-        })}
+            <h4>{diary.tag}</h4>
+            <p>({diary.email})</p>
+            <TodoList extracted={diary.extracted_todos} manual={diary.manual_todos} />
+          </div>
+        );
+      })}
     </section>
+  ) : (
+    <article className={clsx(global.emptyDiaryContainer, { [global.loaded]: isLoaded })}>
+      <h2>구독 가능한 투두리스트가 없습니다.</h2>
+      <p>팔로잉을 늘려보세요.</p>
+    </article>
   );
 };
 

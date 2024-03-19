@@ -1,0 +1,32 @@
+{
+  "name": "Application Marka",
+  "short_name": "Marka",
+  "description": "Diray and Todo.",
+  "icons": [
+    {
+      "src": "/app-marka/icons/pwa-64x64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "/app-marka/icons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/app-marka/icons/android-chrome-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/app-marka/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "start_url": "/app-marka",
+  "display": "standalone",
+  "orientation": "portrait"
+}

@@ -2,7 +2,7 @@
   min-height: 108px;
 }
 
-.buttonSyncWrapper {
+.buttonWrapper {
   width: 100%;
 
   display: flex;
@@ -10,10 +10,10 @@
   opacity: 1;
 }
 
-.buttonSyncWrapper > button {
+.buttonWrapper > button {
   font-size: 1.8rem;
 }
 
-.buttonSyncWrapper > button:first-child {
+.buttonWrapper > button:first-child {
   margin-right: 24px;
 }
