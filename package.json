@@ -4,8 +4,8 @@
   "private": true,
   "homepage": "https://roscoe.ahnsehyeok.info/app-marka/",
   "scripts": {
-    "dev": "next dev -p 3010",
-    "start": "next start -H 0.0.0.0",
+    "dev": "next dev -p 3000",
+    "start": "next start -H 0.0.0.0 -p 4000",
     "lint": "next lint",
     "build": "next build",
     "predeploy": "npm run build",
